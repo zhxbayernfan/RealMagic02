@@ -37,6 +37,7 @@ model = AutoModel.from_pretrained(
     trust_remote_code=True,
     torch_dtype=torch.bfloat16,
 ).to(device).eval()
+torch.cuda.reset_peak_memory_stats()
 
 # 加载并缩放图片
 print(f"加载图片: {image_path}")
@@ -156,3 +157,5 @@ if boxes:
     print(f"共检测到 {len(boxes)} 个框")
 else:
     print("未检测到任何框")
+gpu_mem = torch.cuda.max_memory_allocated() / 1024**2
+print(f"\nGPU_MEM: {gpu_mem:.0f}MB")

@@ -29,6 +29,7 @@ model = AutoModel.from_pretrained(
     trust_remote_code=True,
     torch_dtype=torch.bfloat16,
 ).to(device).eval()
+torch.cuda.reset_peak_memory_stats()
 
 print(f"加载图片: {image_path}")
 image = Image.open(image_path).convert("RGB")
@@ -161,4 +162,6 @@ output_path = os.path.join(script_dir, "result-2.jpeg")
 orig_image.save(output_path, quality=95)
 print(f"已保存球员标注图: {output_path}")
 
+gpu_mem = torch.cuda.max_memory_allocated() / 1024**2
+print(f"GPU_MEM: {gpu_mem:.0f}MB")
 print("\n全部完成！")

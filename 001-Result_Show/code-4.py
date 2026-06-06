@@ -15,6 +15,7 @@ print("加载模型...")
 processor = AutoProcessor.from_pretrained(model_path, trust_remote_code=True)
 device = torch.device("cuda:0")
 model = AutoModel.from_pretrained(model_path, trust_remote_code=True, torch_dtype=torch.bfloat16).to(device).eval()
+torch.cuda.reset_peak_memory_stats()
 
 image = Image.open(image_path).convert("RGB")
 orig_w, orig_h = image.size
@@ -123,4 +124,6 @@ for i, (x1, y1, x2, y2) in enumerate(player_boxes):
 
 output_path = os.path.join(script_dir, "result-4.jpg")
 orig_image.save(output_path, quality=95)
+gpu_mem = torch.cuda.max_memory_allocated() / 1024**2
 print(f"已保存: {output_path}")
+print(f"GPU_MEM: {gpu_mem:.0f}MB")
