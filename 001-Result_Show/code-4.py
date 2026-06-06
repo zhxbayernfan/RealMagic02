@@ -98,26 +98,8 @@ print("\n检测球员...")
 player_boxes = detect_objects("Find all the players in the image.")
 print(f"检测到 {len(player_boxes)} 人")
 
-# 按 y1 分前后排（y1 小=后排站立, y1 大=前排蹲坐）
-player_boxes.sort(key=lambda b: b[1])
-mid = len(player_boxes) // 2
-gap = player_boxes[mid][1] - player_boxes[mid-1][1]
-if gap < 20:
-    # y1 分布均匀，按 y1 中位线分排
-    y1s = sorted(b[1] for b in player_boxes)
-    split_y = y1s[len(y1s)//2] + 30
-else:
-    split_y = (player_boxes[mid][1] + player_boxes[mid-1][1]) // 2
-
-back_row = [b for b in player_boxes if b[1] < split_y]
-front_row = [b for b in player_boxes if b[1] >= split_y]
-back_row.sort(key=lambda b: b[0])
-front_row.sort(key=lambda b: b[0])
-
-print(f"后排(站立) {len(back_row)}人, 前排(蹲坐) {len(front_row)}人")
-
-# 合并且按行内x1编号
-all_players = [(b, 'back') for b in back_row] + [(b, 'front') for b in front_row]
+# 按 x1 从左到右排序
+player_boxes.sort(key=lambda b: b[0])
 
 orig_image = Image.open(image_path).convert("RGB")
 draw = ImageDraw.Draw(orig_image)
@@ -128,7 +110,7 @@ colors = ["#FF6B6B","#4ECDC4","#45B7D1","#96CEB4","#FFEAA7","#DDA0DD",
           "#8BE836","#FFBB28","#38B6FF","#FF66C4","#7ED957","#CB6CE6"]
 
 print("\n从左到右:")
-for i, ((x1, y1, x2, y2), row) in enumerate(all_players):
+for i, (x1, y1, x2, y2) in enumerate(player_boxes):
     x1_orig = int(x1 * scale_x)
     y1_orig = int(y1 * scale_y)
     x2_orig = int(x2 * scale_x)
@@ -137,8 +119,7 @@ for i, ((x1, y1, x2, y2), row) in enumerate(all_players):
     draw.rectangle([x1_orig, y1_orig, x2_orig, y2_orig], outline=c, width=3)
     label = f"player-{i+1}"
     draw.text((x1_orig, y1_orig - 22), label, fill=c, font=font)
-    row_tag = "后排" if row == 'back' else "前排"
-    print(f"  P{i+1} [{row_tag}]: 框({x1},{y1},{x2},{y2})")
+    print(f"  P{i+1}: 框({x1},{y1},{x2},{y2})")
 
 output_path = os.path.join(script_dir, "result-4.jpg")
 orig_image.save(output_path, quality=95)

@@ -17,8 +17,6 @@ model_path = "/home/zhanghexiang/LocateAnything-3B"
 image_path = os.path.join(script_dir, "original-2.jpeg")
 max_side = 1008
 
-player_order = [(0,"")]
-
 # ==============================================
 
 print("加载处理器...")
