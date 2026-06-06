@@ -4,7 +4,7 @@ Test script for LocateAnything-3B model.
 Locates objects in images based on natural language queries.
 
 Usage:
-    python Test_LocateAnthing.py
+    python Test_LocateAnything.py
 
 Requirements:
     pip install transformers==4.46.0 torch torchvision pillow accelerate peft
