@@ -10,7 +10,7 @@ model_path = "/home/zhanghexiang/LocateAnything-3B"
 image_path = os.path.join(script_dir, "original-3.jpeg")
 question = "List the four trophies from left to right: 1.silver cup 2.trophy with big ears 3.round shield 4.gold cup. Output a bounding box for each."
 label = "trophy"
-max_side = 1500
+max_side = 1008
 
 print("加载模型...")
 processor = AutoProcessor.from_pretrained(model_path, trust_remote_code=True)

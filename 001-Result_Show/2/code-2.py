@@ -1,17 +1,15 @@
 #!/usr/bin/python3
+"""Detect players in team photo."""
 import os, re, torch
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
 from PIL import Image, ImageDraw, ImageFont
 from transformers import AutoModel, AutoProcessor
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = "/home/zhanghexiang/LocateAnything-3B"
 image_path = os.path.join(script_dir, "original-2.jpeg")
-question = "Find all the players in the image."
-label = "player"
-max_side = 1500
+max_side = 1008
 
 print("加载模型...")
 processor = AutoProcessor.from_pretrained(model_path, trust_remote_code=True)
@@ -19,7 +17,6 @@ device = torch.device("cuda:0")
 model = AutoModel.from_pretrained(model_path, trust_remote_code=True, torch_dtype=torch.bfloat16).to(device).eval()
 torch.cuda.reset_peak_memory_stats()
 
-print(f"加载图片: {image_path}")
 image = Image.open(image_path).convert("RGB")
 orig_w, orig_h = image.size
 print(f"原始尺寸: {orig_w}x{orig_h}")
@@ -28,21 +25,24 @@ if max(orig_w, orig_h) > max_side:
     scale = max_side / max(orig_w, orig_h)
     new_w = int(orig_w * scale)
     new_h = int(orig_h * scale)
-    image = image.resize((new_w, new_h), Image.LANCZOS)
+    scaled_image = image.resize((new_w, new_h), Image.LANCZOS)
     print(f"缩放后尺寸: {new_w}x{new_h}")
 else:
     new_w, new_h = orig_w, orig_h
+    scaled_image = image
 
 scale_x = orig_w / new_w
 scale_y = orig_h / new_h
 
 try:
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24)
+    font_large = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 32)
 except:
     font = ImageFont.load_default()
+    font_large = font
 
 def query_model(question):
-    messages = [{"role": "user", "content": [{"type": "image", "image": image}, {"type": "text", "text": question}]}]
+    messages = [{"role": "user", "content": [{"type": "image", "image": scaled_image}, {"type": "text", "text": question}]}]
     text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     imgs, vids = processor.process_vision_info(messages)
     inputs = processor(text=[text], images=imgs, videos=vids, return_tensors="pt").to(model.device)
@@ -55,54 +55,68 @@ def query_model(question):
     print("模型输出：", result)
     return result
 
-result = query_model(question)
-boxes = re.findall(r'<box><(\d+)><(\d+)><(\d+)><(\d+)></box>', result)
-
-if boxes:
-    unique_boxes = []
-    tol = 50
+def detect_objects(question):
+    result = query_model(question)
+    boxes = re.findall(r'<box><(\d+)><(\d+)><(\d+)><(\d+)></box>', result)
+    valid = []
     for box in boxes:
         x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
         if (x1 == 0 and y1 == 0 and x2 >= 990 and y2 >= 990):
             continue
         if x2 - x1 < 10 or y2 - y1 < 10:
             continue
-        is_dup = False
-        for ux1, uy1, ux2, uy2 in unique_boxes:
-            if abs(x1 - ux1) < tol and abs(y1 - uy1) < tol and abs(x2 - ux2) < tol and abs(y2 - uy2) < tol:
-                is_dup = True
-                break
-        if not is_dup:
-            unique_boxes.append((x1, y1, x2, y2))
-    print(f"原始 {len(boxes)} 个框，去重后 {len(unique_boxes)} 个")
+        valid.append((x1, y1, x2, y2))
 
-    image_area = new_w * new_h
-    filtered_boxes = []
-    for (x1, y1, x2, y2) in unique_boxes:
-        box_area = (x2 - x1) * (y2 - y1)
-        if box_area < 0.9 * image_area:
-            filtered_boxes.append((x1, y1, x2, y2))
-    unique_boxes = filtered_boxes
+    unique = []
+    for box in valid:
+        x1, y1, x2, y2 = box
+        if y2 - y1 < 50:
+            continue
+        if not any(abs(x1-ux1)<50 and abs(y1-uy1)<50 and abs(x2-ux2)<50 and abs(y2-uy2)<50 for ux1,uy1,ux2,uy2 in unique):
+            unique.append(box)
 
-    orig_image = Image.open(image_path).convert("RGB")
-    draw = ImageDraw.Draw(orig_image)
-    colors = ["red", "blue", "green", "orange", "purple", "cyan", "magenta", "yellow"]
+    if len(unique) >= 2:
+        heights = [y2 - y1 for x1, y1, x2, y2 in unique]
+        median_h = sorted(heights)[len(heights) // 2]
+        fixed = []
+        for x1, y1, x2, y2 in unique:
+            h = y2 - y1
+            if h < median_h * 0.6:
+                y1 = max(0, y2 - int(median_h))
+            fixed.append((x1, y1, x2, y2))
+        unique = fixed
 
-    for i, (x1, y1, x2, y2) in enumerate(unique_boxes):
-        x1_orig = int(float(x1) / 1000 * new_w * scale_x)
-        y1_orig = int(float(y1) / 1000 * new_h * scale_y)
-        x2_orig = int(float(x2) / 1000 * new_w * scale_x)
-        y2_orig = int(float(y2) / 1000 * new_h * scale_y)
-        color = colors[i % len(colors)]
-        draw.rectangle([x1_orig, y1_orig, x2_orig, y2_orig], outline=color, width=3)
-        draw.text((x1_orig, y1_orig - 25), label, fill=color, font=font)
+    headroom = []
+    for x1, y1, x2, y2 in unique:
+        h = y2 - y1
+        extend = int(h * 0.08)
+        y1_new = max(20, y1 - extend)
+        headroom.append((x1, y1_new, x2, y2))
+    unique = headroom
+    return unique
 
-    output_path = os.path.join(script_dir, "result-2.jpeg")
-    orig_image.save(output_path, quality=95)
-    print(f"已保存: {output_path}")
-    print(f"共检测到 {len(boxes)} 个框")
-else:
-    print("未检测到任何框")
+print("\n检测球员...")
+player_boxes = detect_objects("Find all the players in the image.")
+player_boxes.sort(key=lambda b: b[0])
+print(f"检测到 {len(player_boxes)} 人")
 
+orig_image = Image.open(image_path).convert("RGB")
+draw = ImageDraw.Draw(orig_image)
+colors = ["#FF6B6B","#4ECDC4","#45B7D1","#96CEB4","#FFEAA7","#DDA0DD",
+          "#FF8C42","#6BCB77","#4D96FF","#FF6B9D","#C9B1FF","#FFD93D"]
+
+for i, (x1, y1, x2, y2) in enumerate(player_boxes):
+    x1_orig = int(x1 * scale_x)
+    y1_orig = int(y1 * scale_y)
+    x2_orig = int(x2 * scale_x)
+    y2_orig = int(y2 * scale_y)
+    c = colors[i % len(colors)]
+    draw.rectangle([x1_orig, y1_orig, x2_orig, y2_orig], outline=c, width=4)
+    draw.text((x1_orig, y1_orig - 30), f"player-{i+1}", fill=c, font=font_large)
+    print(f"  player-{i+1}")
+
+output_path = os.path.join(script_dir, "result-2.jpeg")
+orig_image.save(output_path, quality=95)
+print(f"已保存: {output_path}")
 gpu_mem = torch.cuda.max_memory_allocated() / 1024**2
 print(f"GPU_MEM: {gpu_mem:.0f}")
