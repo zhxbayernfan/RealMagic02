@@ -20,8 +20,8 @@ from transformers import AutoModel, AutoProcessor
 
 # ==================== 配置 ====================
 model_path = "/home/zhanghexiang/LocateAnything-3B"
-image_path = "/home/zhanghexiang/zhx/RealMagic02/001-Result_Show/original-5.jpeg"
-question = "Find the text in the image."  # 自然语言查询
+image_path = "/home/zhanghexiang/zhx/RealMagic02/001-Result_Show/5/original-5.jpeg"
+question = "Find the train station in the image."  # 自然语言查询
 max_side = 1008  # 图片最大边长，控制显存占用
 # ==============================================
 
@@ -59,7 +59,7 @@ messages = [{
     "role": "user",
     "content": [
         {"type": "image", "image": image},
-        {"type": "text", "text": question}
+        {"type": "station", "station": question}
     ]
 }]
 text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
@@ -151,9 +151,9 @@ if boxes:
 
         color = colors[i % len(colors)]
         draw.rectangle([x1_orig, y1_orig, x2_orig, y2_orig], outline=color, width=3)
-        draw.text((x1_orig, y1_orig - 25), "text", fill=color, font=font)
+        draw.text((x1_orig, y1_orig - 25), "station", fill=color, font=font)
 
-    output_path = "/home/zhanghexiang/zhx/RealMagic02/001-Result_Show/result-5.jpeg"
+    output_path = "/home/zhanghexiang/zhx/RealMagic02/001-Result_Show/5/result-5.jpeg"
     orig_image.save(output_path, quality=95)
     print(f"已保存带框体的图片: {output_path}")
     print(f"共检测到 {len(boxes)} 个框")
