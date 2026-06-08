@@ -8,9 +8,9 @@ from transformers import AutoModel, AutoProcessor
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = "/home/zhanghexiang/LocateAnything-3B"
-image_path = os.path.join(script_dir, "original-4.jpg")
-question = "Find all the players in the image."
-label = "player"
+image_path = os.path.join(script_dir, "original-6.jpg")
+question = "Find all people in the image."
+label = "person"
 max_side = 1500
 
 print("加载模型...")
@@ -97,7 +97,7 @@ if boxes:
         draw.rectangle([x1_orig, y1_orig, x2_orig, y2_orig], outline=color, width=3)
         draw.text((x1_orig, y1_orig - 25), label, fill=color, font=font)
 
-    output_path = os.path.join(script_dir, "result-4.jpg")
+    output_path = os.path.join(script_dir, "result-6.jpg")
     orig_image.save(output_path, quality=95)
     print(f"已保存: {output_path}")
     print(f"共检测到 {len(boxes)} 个框")

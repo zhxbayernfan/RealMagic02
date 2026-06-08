@@ -1,17 +1,16 @@
 #!/usr/bin/python3
-"""
-Trophies script: Q2结构化查询获取四个奖杯原始框，加标签输出。
-"""
 import os, re, torch
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-script_dir = os.path.dirname(os.path.abspath(__file__))
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 from PIL import Image, ImageDraw, ImageFont
 from transformers import AutoModel, AutoProcessor
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = "/home/zhanghexiang/LocateAnything-3B"
 image_path = os.path.join(script_dir, "original-3.jpeg")
-max_side = 1008
+question = "List the four trophies from left to right: 1.silver cup 2.trophy with big ears 3.round shield 4.gold cup. Output a bounding box for each."
+label = "trophy"
+max_side = 1500
 
 print("加载模型...")
 processor = AutoProcessor.from_pretrained(model_path, trust_remote_code=True)
@@ -19,15 +18,30 @@ device = torch.device("cuda:0")
 model = AutoModel.from_pretrained(model_path, trust_remote_code=True, torch_dtype=torch.bfloat16).to(device).eval()
 torch.cuda.reset_peak_memory_stats()
 
+print(f"加载图片: {image_path}")
 image = Image.open(image_path).convert("RGB")
 orig_w, orig_h = image.size
-scale = max_side / max(orig_w, orig_h)
-new_w, new_h = int(orig_w * scale), int(orig_h * scale)
-scaled_image = image.resize((new_w, new_h), Image.LANCZOS)
-scale_x, scale_y = orig_w / new_w, orig_h / new_h
+print(f"原始尺寸: {orig_w}x{orig_h}")
+
+if max(orig_w, orig_h) > max_side:
+    scale = max_side / max(orig_w, orig_h)
+    new_w = int(orig_w * scale)
+    new_h = int(orig_h * scale)
+    image = image.resize((new_w, new_h), Image.LANCZOS)
+    print(f"缩放后尺寸: {new_w}x{new_h}")
+else:
+    new_w, new_h = orig_w, orig_h
+
+scale_x = orig_w / new_w
+scale_y = orig_h / new_h
+
+try:
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24)
+except:
+    font = ImageFont.load_default()
 
 def query_model(question):
-    messages = [{"role": "user", "content": [{"type": "image", "image": scaled_image}, {"type": "text", "text": question}]}]
+    messages = [{"role": "user", "content": [{"type": "image", "image": image}, {"type": "text", "text": question}]}]
     text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     imgs, vids = processor.process_vision_info(messages)
     inputs = processor(text=[text], images=imgs, videos=vids, return_tensors="pt").to(model.device)
@@ -36,40 +50,58 @@ def query_model(question):
         outputs = model.generate(pixel_values=pixel_values, input_ids=inputs["input_ids"],
             attention_mask=inputs["attention_mask"], image_grid_hws=inputs.get("image_grid_hws", None),
             tokenizer=processor, max_new_tokens=128, generation_mode="hybrid", do_sample=False, use_cache=True)
-    return outputs if isinstance(outputs, str) else processor.decode(outputs[0], skip_special_tokens=True)
+    result = outputs if isinstance(outputs, str) else processor.decode(outputs[0], skip_special_tokens=True)
+    print("模型输出：", result)
+    return result
 
-# 结构化查询：一次获取四个奖杯
-trophy_names = ["trophy-1","trophy-2","trophy-3","trophy-4","trophy-5","trophy-6","trophy-7","trophy-8"]
-trophy_colors = ["gold", "orange", "cyan", "yellow"]
-
-try:
-    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 28)
-except:
-    font = ImageFont.load_default()
-
-result = query_model(
-    "List the four trophies from left to right: 1.silver cup 2.trophy with big ears 3.round shield 4.gold cup. Output a bounding box for each."
-)
+result = query_model(question)
 boxes = re.findall(r'<box><(\d+)><(\d+)><(\d+)><(\d+)></box>', result)
-print(f"检测到 {len(boxes)} 个奖杯")
 
-draw = ImageDraw.Draw(image)
+if boxes:
+    unique_boxes = []
+    tol = 50
+    for box in boxes:
+        x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
+        if (x1 == 0 and y1 == 0 and x2 >= 990 and y2 >= 990):
+            continue
+        if x2 - x1 < 10 or y2 - y1 < 10:
+            continue
+        is_dup = False
+        for ux1, uy1, ux2, uy2 in unique_boxes:
+            if abs(x1 - ux1) < tol and abs(y1 - uy1) < tol and abs(x2 - ux2) < tol and abs(y2 - uy2) < tol:
+                is_dup = True
+                break
+        if not is_dup:
+            unique_boxes.append((x1, y1, x2, y2))
+    print(f"原始 {len(boxes)} 个框，去重后 {len(unique_boxes)} 个")
 
-for i, (x1, y1, x2, y2) in enumerate(boxes):
-    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-    ox1 = int(x1 / 1000 * new_w * scale_x)
-    oy1 = int(y1 / 1000 * new_h * scale_y)
-    ox2 = int(x2 / 1000 * new_w * scale_x)
-    oy2 = int(y2 / 1000 * new_h * scale_y)
+    image_area = new_w * new_h
+    filtered_boxes = []
+    for (x1, y1, x2, y2) in unique_boxes:
+        box_area = (x2 - x1) * (y2 - y1)
+        if box_area < 0.9 * image_area:
+            filtered_boxes.append((x1, y1, x2, y2))
+    unique_boxes = filtered_boxes
 
-    name = trophy_names[i] if i < len(trophy_names) else f"trophy-{i+1}"
-    c = trophy_colors[i % len(trophy_colors)]
-    draw.rectangle([ox1, oy1, ox2, oy2], outline=c, width=4)
-    draw.text((ox1, oy1 - 32), name, fill=c, font=font)
-    print(f"  {name}: 模型框({x1},{y1},{x2},{y2}) -> 原图({ox1},{oy1},{ox2},{oy2})")
+    orig_image = Image.open(image_path).convert("RGB")
+    draw = ImageDraw.Draw(orig_image)
+    colors = ["red", "blue", "green", "orange", "purple", "cyan", "magenta", "yellow"]
 
-output_path = os.path.join(script_dir, "result-3.jpeg")
-image.save(output_path, quality=95)
+    for i, (x1, y1, x2, y2) in enumerate(unique_boxes):
+        x1_orig = int(float(x1) / 1000 * new_w * scale_x)
+        y1_orig = int(float(y1) / 1000 * new_h * scale_y)
+        x2_orig = int(float(x2) / 1000 * new_w * scale_x)
+        y2_orig = int(float(y2) / 1000 * new_h * scale_y)
+        color = colors[i % len(colors)]
+        draw.rectangle([x1_orig, y1_orig, x2_orig, y2_orig], outline=color, width=3)
+        draw.text((x1_orig, y1_orig - 25), label, fill=color, font=font)
+
+    output_path = os.path.join(script_dir, "result-3.jpeg")
+    orig_image.save(output_path, quality=95)
+    print(f"已保存: {output_path}")
+    print(f"共检测到 {len(boxes)} 个框")
+else:
+    print("未检测到任何框")
+
 gpu_mem = torch.cuda.max_memory_allocated() / 1024**2
-print(f"\n奖杯标注图已保存: {output_path}")
-print(f"GPU_MEM: {gpu_mem:.0f}MB")
+print(f"GPU_MEM: {gpu_mem:.0f}")
