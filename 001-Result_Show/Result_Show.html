@@ -11,80 +11,62 @@ h1 { font-size: 28px; font-weight: 300; letter-spacing: 2px; margin-bottom: 32px
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 th { text-align: center; padding: 12px 8px; border-bottom: 2px solid #111; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #555; }
 td { padding: 12px 8px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; text-align: center; }
-td:first-child { width: 5%; color: #999; font-size: 14px; }
-td:nth-child(2) { width: 12%; font-size: 14px; font-weight: 500; }
-td:nth-child(3), td:nth-child(5) { width: 30%; }
-td:nth-child(4) { width: 13%; }
-td:nth-child(6) { width: 8%; color: #666; font-size: 14px; font-variant-numeric: tabular-nums; }
-td:nth-child(7) { width: 10%; color: #666; font-size: 14px; }
+td:first-child { color: #999; font-size: 14px; }
+td:nth-child(2) { font-size: 14px; font-weight: 500; }
+td:nth-child(6), td:nth-child(7) { color: #666; font-size: 14px; font-variant-numeric: tabular-nums; }
 .thumb { max-width: 260px; max-height: 150px; border: 1px solid #ddd; cursor: pointer; transition: box-shadow .2s; }
 .thumb:hover { box-shadow: 0 2px 12px rgba(0,0,0,.15); }
 .code-link { color: #111; text-decoration: none; border: 1px solid #ccc; padding: 6px 16px; font-size: 13px; display: inline-block; }
 .code-link:hover { background: #f5f5f5; }
+.rate-hang { background: #e74c3c; color: #fff; font-weight: 700; }
+.rate-top { background: #f39c12; color: #fff; font-weight: 700; }
+.rate-rsr { background: #f1c40f; color: #111; font-weight: 700; }
+.rate-npc { background: #fdebd0; color: #111; }
 </style>
 </head>
 <body>
-
 <h1>结果展示</h1>
-
 <table>
 <thead>
-<tr><th>#</th><th>名称</th><th>原始图片</th><th>代码</th><th>处理结果</th><th>用时</th><th>GPU 显存</th></tr>
+<tr><th width="1%">#</th><th width="5%">名称</th><th width="22%">输入原图</th><th width="10%">代码</th><th width="22%">输出结果</th><th width="5%">用时</th><th width="5%">GPU 显存</th><th width="20%">评论</th><th width="10%">评价</th></tr>
 </thead>
 <tbody>
-
 <tr>
-  <td>1</td>
-  <td>cat</td>
+  <td>1</td><td>cat</td>
   <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/1/original-1.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/1/original-1.jpeg"></a></td>
   <td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/1/code-1.py" target="_blank">code-1.py</a></td>
   <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/1/result-1.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/1/result-1.jpeg"></a></td>
-  <td>3526ms</td>
-  <td>8887MB</td>
+  <td>3526ms</td><td>8887MB</td><td>识别多了一只不存在的猫，框体右侧顶到了边缘</td><td class="rate-rsr">人上人</td>
 </tr>
-
 <tr>
-  <td>2</td>
-  <td>players1</td>
+  <td>2</td><td>players1</td>
   <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/2/original-2.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/2/original-2.jpeg"></a></td>
   <td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/2/code-2.py" target="_blank">code-2.py</a></td>
   <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/2/result-2.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/2/result-2.jpeg"></a></td>
-  <td>5188ms</td>
-  <td>8912MB</td>
+  <td>5188ms</td><td>8912MB</td><td>六名球员均识别出来了，甚至可以识别到勾肩搭背状态下在其他人肩膀上的手臂部份 但是框体底部仍然顶到边缘</td><td class="rate-hang">夯<sup>-</sup></td>
 </tr>
-
 <tr>
-  <td>3</td>
-  <td>trophies1</td>
+  <td>3</td><td>trophies1</td>
   <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/3/original-3.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/3/original-3.jpeg"></a></td>
   <td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/3/code-3.py" target="_blank">code-3.py</a></td>
   <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/3/result-3.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/3/result-3.jpeg"></a></td>
-  <td>4634ms</td>
-  <td>8876MB</td>
+  <td>4634ms</td><td>8876MB</td><td>四个奖杯完美框住，不大不小。。。但其实这是多次识别的结果，并非模型一次出图</td><td class="rate-hang">"夯"</td>
 </tr>
-
 <tr>
-  <td>4</td>
-  <td>players2</td>
+  <td>4</td><td>players2</td>
   <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/4/original-4.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/4/original-4.jpg"></a></td>
   <td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/4/code-4.py" target="_blank">code-4.py</a></td>
   <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/4/result-4.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/4/result-4.jpg"></a></td>
-  <td>6087ms</td>
-  <td>8901MB</td>
+  <td>6087ms</td><td>8901MB</td><td>11名球员9个正确 2个框体过宽，且人均&ldquo;路易十六&rdquo; 框体底部仍然顶到边缘</td><td class="rate-top">顶级</td>
 </tr>
-
 <tr>
-  <td>5</td>
-  <td>station</td>
+  <td>5</td><td>station</td>
   <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/5/original-5.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/5/original-5.jpeg"></a></td>
   <td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/5/code-5.py" target="_blank">code-5.py</a></td>
   <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/5/result-5.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/5/result-5.jpeg"></a></td>
-  <td>4562ms</td>
-  <td>8894MB</td>
+  <td>4562ms</td><td>8894MB</td><td>模型识别基本失败，对于地图的图例可能不包含</td><td>拉完了</td>
 </tr>
-
 </tbody>
 </table>
-
 </body>
 </html>

@@ -21,7 +21,7 @@ from transformers import AutoModel, AutoProcessor
 # ==================== 配置 ====================
 model_path = "/home/zhanghexiang/LocateAnything-3B"
 image_path = "/home/zhanghexiang/zhx/RealMagic02/001-Result_Show/5/original-5.jpeg"
-question = "Find the train station in the image."  # 自然语言查询
+question = "Find the text in the image."  # 自然语言查询
 max_side = 1008  # 图片最大边长，控制显存占用
 # ==============================================
 
@@ -59,7 +59,7 @@ messages = [{
     "role": "user",
     "content": [
         {"type": "image", "image": image},
-        {"type": "station", "station": question}
+        {"type": "text", "text": question}
     ]
 }]
 text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
