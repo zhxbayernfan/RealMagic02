@@ -7,17 +7,17 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Times New Roman',KaiTi,serif; background: #fff; color: #111; padding: 40px; }
-h1 { font-family: 'Times New Roman',KaiTi,serif; font-size: 28px; font-weight: 300; letter-spacing: 2px; margin-bottom: 32px; border-bottom: 1px solid #ccc; padding-bottom: 12px; }
+h1 { font-family: 'Times New Roman',KaiTi,serif; font-size: 28px; font-weight: 300; letter-spacing: 2px; margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 12px; }
+.subtitle { font-size: 13px; color: #888; margin-bottom: 28px; }
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-th { text-align: center; padding: 12px 8px; border-bottom: 2px solid #111; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #555; }
-td { padding: 12px 8px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; text-align: center; }
+th { text-align: center; padding: 14px 8px; border-bottom: 2px solid #111; font-size: 13px; font-weight: 600; letter-spacing: 1px; color: #555; white-space: nowrap; }
+td { padding: 14px 8px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; text-align: center; }
 td:first-child { color: #999; font-size: 14px; }
-td:nth-child(2) { font-size: 14px; font-weight: 500; }
-td:nth-child(6), td:nth-child(7) { color: #666; font-size: 14px; font-variant-numeric: tabular-nums; }
 .thumb { max-width: 260px; max-height: 150px; border: 1px solid #ddd; cursor: pointer; transition: box-shadow .2s; }
 .thumb:hover { box-shadow: 0 2px 12px rgba(0,0,0,.15); }
-.LACode-link { color: #111; text-decoration: none; border: 1px solid #ccc; padding: 6px 16px; font-size: 13px; display: inline-block; }
-.LACode-link:hover { background: #f5f5f5; }
+.code-link { color: #111; text-decoration: none; border: 1px solid #ccc; padding: 6px 14px; font-size: 12px; display: inline-block; }
+.code-link:hover { background: #f5f5f5; }
+.mc-desc { text-align: left; font-size: 12px; color: #333; }
 .rate-hang { background: #e74c3c; color: #111; font-weight: 700; }
 .rate-top { background: #f39c12; color: #111; font-weight: 700; }
 .rate-rsr { background: #f1c40f; color: #111; font-weight: 700; }
@@ -26,102 +26,195 @@ td:nth-child(6), td:nth-child(7) { color: #666; font-size: 14px; font-variant-nu
 </style>
 </head>
 <body>
-<h1>结果展示</h1>
+<h1>LocateAnything结果展示</h1>
+<p class="subtitle">以下表格包含模型MiniCPM V4.6数据（MC，下同）和LocateAnything-3B数据（LA，下同）</p>
 <table>
 <thead>
-<tr><th width="1%">#</th><th width="5%">名称</th><th width="22%">输入原图</th><th width="10%">代码</th><th width="22%">输出结果</th><th width="5%">用时</th><th width="5%">GPU</th><th width="20%">评论</th><th width="10%">评价</th></tr>
+<tr>
+<th width="2%">序号</th>
+<th width="4%">名称</th>
+<th width="10%">输入原图</th>
+<th width="8%">图片尺寸</th>
+<th width="6%">MC代码</th>
+<th width="6%">MC用时</th>
+<th width="10%">MC描述</th>
+<th width="6%">LA代码</th>
+<th width="10%">LA结果</th>
+<th width="6%">LA用时</th>
+<th width="6%">LA消耗GPU</th>
+<th width="18%">对LA的简评</th>
+<th width="8%">LA评级</th>
+</tr>
 </thead>
 <tbody>
 <tr>
-  <td>001</td><td>cat</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/001/original-001.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/001/original-001.jpeg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/001/LACode-001.py" target="_blank">LACode-001.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/001/LAResult-001.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/001/LAResult-001.jpeg"></a></td>
-  <td>6254ms</td><td>13.6GB</td><td>主体猫猫圈出来了,识别多了若干个无意义框体</td><td class="rate-top">顶级</td>
+<td>001</td><td>cat</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/001/original-001.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/001/original-001.jpeg"></a></td>
+<td>1080x1920</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/001/MCCode-001.py" target="_blank">MCCode-001.py</a></td>
+<td>1020ms</td>
+<td class="mc-desc">这张图片展示了一只白色的猫咪,它蜷缩坐在一个紫色的垫子之上.猫咪的毛发蓬松柔软,看起来非常舒适和放松.垫子放置在一个编织的棕色家具上,可能是椅子或沙发.整体氛围温馨宁静,猫咪似乎正在休息或沉思.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/001/LACode-001.py" target="_blank">LACode-001.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/001/LAResult-001.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/001/LAResult-001.jpeg"></a></td>
+<td>6254ms</td><td>13.6GB</td>
+<td>主体猫猫圈出来了,识别多了若干个无意义框体</td>
+<td class="rate-top">顶级</td>
 </tr>
 <tr>
-  <td>002</td><td>players1</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/002/original-002.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/002/original-002.jpeg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/002/LACode-002.py" target="_blank">LACode-002.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/002/LAResult-002.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/002/LAResult-002.jpeg"></a></td>
-  <td>5450ms</td><td>8.9GB</td><td>六名球员均识别出来了,甚至可以识别到勾肩搭背状态下在其他人肩膀上的手臂部份,但是框体底部仍然顶到边缘</td><td class="rate-hang">夯<sup>-</sup></td>
+<td>002</td><td>players1</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/002/original-002.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/002/original-002.jpeg"></a></td>
+<td>3924x2437</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/002/MCCode-002.py" target="_blank">MCCode-002.py</a></td>
+<td>2760ms</td>
+<td class="mc-desc">这张图片展示了六名身穿红色运动服的足球运动员,他们面带笑容,手持多个大型奖杯,显得非常自豪和庆祝.从左到右:一位球员手持银色奖杯上有"MÜNCHEN 2012"字样;中间偏左的球员手持欧洲冠军杯;中间偏右的球员手持银色圆形奖杯;后排穿绿色守门员服的球员;右侧球员手持金色奖杯;最右侧光头球员也手持金色奖杯.所有球员都穿着印有"T"标志的红色球衣,表明他们是拜仁慕尼黑足球俱乐部成员.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/002/LACode-002.py" target="_blank">LACode-002.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/002/LAResult-002.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/002/LAResult-002.jpeg"></a></td>
+<td>5450ms</td><td>8.9GB</td>
+<td>六名球员均识别出来了,甚至可以识别到勾肩搭背状态下在其他人肩膀上的手臂部份,但是框体底部仍然顶到边缘</td>
+<td class="rate-hang">夯<sup>-</sup></td>
 </tr>
 <tr>
-  <td>003</td><td>trophies1</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/003/original-003.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/003/original-003.jpeg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/003/LACode-003.py" target="_blank">LACode-003.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/003/LAResult-003.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/003/LAResult-003.jpeg"></a></td>
-  <td>4716ms</td><td>8.9GB</td><td>四个奖杯完美框住,不大不小...但其实这是多次识别的结果,并非模型一次出图</td><td class="rate-hang">"夯"</td>
+<td>003</td><td>trophies1</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/003/original-003.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/003/original-003.jpeg"></a></td>
+<td>3924x2437</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/003/MCCode-003.py" target="_blank">MCCode-003.py</a></td>
+<td>2757ms</td>
+<td class="mc-desc">同002(同一张图,重复识别)</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/003/LACode-003.py" target="_blank">LACode-003.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/003/LAResult-003.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/003/LAResult-003.jpeg"></a></td>
+<td>4716ms</td><td>8.9GB</td>
+<td>四个奖杯完美框住,不大不小...但其实这是多次识别的结果,并非模型一次出图</td>
+<td class="rate-hang">"夯"</td>
 </tr>
 <tr>
-  <td>004</td><td>players2</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/004/original-004.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/004/original-004.jpg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/004/LACode-004.py" target="_blank">LACode-004.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/004/LAResult-004.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/004/LAResult-004.jpg"></a></td>
-  <td>5607ms</td><td>9.1GB</td><td>11名球员9个正确,2个框体过宽,且人均"路易十六",框体底部仍然顶到边缘</td><td class="rate-rsr">人上人</td>
+<td>004</td><td>players2</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/004/original-004.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/004/original-004.jpg"></a></td>
+<td>2048x1365</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/004/MCCode-004.py" target="_blank">MCCode-004.py</a></td>
+<td>2297ms</td>
+<td class="mc-desc">这张图片展示了一支足球球队在Stadium前合影的场景.球队成员身穿红色主调,带有白色竖条纹的球衣,胸前印有"T"字标志,表明是拜仁慕尼黑的队服.队伍分为前后两排,前排球员多呈蹲姿或交叉手臂,后排球员站立,部分队员手臂搭在前后队友肩上.左侧有一位身穿绿色守门员球衣的队员.背景是座无虚席的体育场,场边广告牌可见"CHAMPIONS LEAGUE"和"QATAR A"等字样.图片右下角有"知乎 @英仙说"的水印.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/004/LACode-004.py" target="_blank">LACode-004.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/004/LAResult-004.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/004/LAResult-004.jpg"></a></td>
+<td>5607ms</td><td>9.1GB</td>
+<td>11名球员9个正确,2个框体过宽,且人均"路易十六",框体底部仍然顶到边缘</td>
+<td class="rate-rsr">人上人</td>
 </tr>
 <tr>
-  <td>005</td><td>station</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/005/original-005.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/005/original-005.jpeg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/005/LACode-005.py" target="_blank">LACode-005.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/005/LAResult-005.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/005/LAResult-005.jpeg"></a></td>
-  <td>5488ms</td><td>10.4GB</td><td>模型识别基本失败,对于地图的图例可能难以识别</td><td class="rate-done">拉完了</td>
+<td>005</td><td>station</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/005/original-005.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/005/original-005.jpeg"></a></td>
+<td>1001x888</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/005/MCCode-005.py" target="_blank">MCCode-005.py</a></td>
+<td>1816ms</td>
+<td class="mc-desc">这是一张城市街道地图,展示了多个地标,道路和绿地.地图中心区域有"银湖山郊野公园"和"黄竹园"等绿色区域.主要道路包括"津中大道","北环大道"和"梅林路".地图左侧有"梅林山公园"和"梅林村公交站",右侧有"罗湖北站"和"IBC N".地图中分布着多个商业和公共设施,如"深圳市福田区","深圳商业广场"等.整体来看,这张地图展示了城市中的交通网络,绿地和重要地标.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/005/LACode-005.py" target="_blank">LACode-005.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/005/LAResult-005.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/005/LAResult-005.jpeg"></a></td>
+<td>5488ms</td><td>10.4GB</td>
+<td>模型识别基本失败,对于地图的图例可能难以识别</td>
+<td class="rate-done">拉完了</td>
 </tr>
 <tr>
-  <td>006</td><td>person</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/006/original-006.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/006/original-006.jpg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/006/LACode-006.py" target="_blank">LACode-006.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/006/LAResult-006.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/006/LAResult-006.jpg"></a></td>
-  <td>7285ms</td><td>18.3GB</td><td>精准识别出图中的5个人,框体宽度也合适,但是画面右侧有奇怪框体,问题同1</td><td class="rate-top">顶级<sup>+</sup></td>
+<td>006</td><td>person</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/006/original-006.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/006/original-006.jpg"></a></td>
+<td>1920x1440</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/006/MCCode-006.py" target="_blank">MCCode-006.py</a></td>
+<td>1085ms</td>
+<td class="mc-desc">这张图片展示了一个现代化的办公空间,许多员工正在各自的工作台前使用电脑.办公室设计简洁明亮,白色墙壁和天花板上的长条形照明灯提供了充足的照明.窗户配有遮光帘,自然光透过窗户洒入室内.办公桌上摆放着多台显示器,键盘和鼠标,部分员工正专注地操作电脑,有的则在交谈或休息.整体氛围显得忙碌而有序,体现了现代职场的工作环境.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/006/LACode-006.py" target="_blank">LACode-006.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/006/LAResult-006.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/006/LAResult-006.jpg"></a></td>
+<td>7285ms</td><td>18.3GB</td>
+<td>精准识别出图中的5个人,框体宽度也合适,但是画面右侧有奇怪框体,问题同1</td>
+<td class="rate-top">顶级<sup>+</sup></td>
 </tr>
 <tr>
-  <td>007</td><td>screen</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/007/original-007.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/007/original-007.jpg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/007/LACode-007.py" target="_blank">LACode-007.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/007/LAResult-007.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/007/LAResult-007.jpg"></a></td>
-  <td>7365ms</td><td>18.3GB</td><td>同一张图,略微有点难度,在办公室的电脑都是两两相对的,所以有的识别出来了(比如思航那里的红框),但是华哥这里的四台电脑只识别出两个,有一个侧置对模型过于艰难了...右侧...黄框又识别出了两台电脑...还有就是同1,6的问题,最角落的奇怪框体</td><td class="rate-top">顶级<sup>-</sup></td>
+<td>007</td><td>screen</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/007/original-007.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/007/original-007.jpg"></a></td>
+<td>1920x1440</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/007/MCCode-007.py" target="_blank">MCCode-007.py</a></td>
+<td>1083ms</td>
+<td class="mc-desc">同006(同一张图,重复识别)</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/007/LACode-007.py" target="_blank">LACode-007.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/007/LAResult-007.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/007/LAResult-007.jpg"></a></td>
+<td>7365ms</td><td>18.3GB</td>
+<td>同一张图,略微有点难度,在办公室的电脑都是两两相对的,所以有的识别出来了(比如思航那里的红框),但是华哥这里的四台电脑只识别出两个,有一个侧置对模型过于艰难了...右侧...黄框又识别出了两台电脑...还有就是同1,6的问题,最角落的奇怪框体</td>
+<td class="rate-top">顶级<sup>-</sup></td>
 </tr>
 <tr>
-  <td>008</td><td>cats</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/008/original-008.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/008/original-008.jpg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/008/LACode-008.py" target="_blank">LACode-008.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/008/LAResult-008.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/008/LAResult-008.jpg"></a></td>
-  <td>4541ms</td><td>9.4GB</td><td>真厉害,我自己看图的时候只注意到了两只猫猫,我还在想:哎,怎么三个框,角落又是奇怪框体么?定神细视:哎!角落里的猫猫都被精准识别出来了...感慨...</td><td class="rate-hang">夯<sup>+</sup></td>
+<td>008</td><td>cats</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/008/original-008.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/008/original-008.jpg"></a></td>
+<td>1080x1440</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/008/MCCode-008.py" target="_blank">MCCode-008.py</a></td>
+<td>1143ms</td>
+<td class="mc-desc">这张图片展示了两个猫咪 peacefuly 休息的场景.一只白色的长毛猫和一只虎斑猫(毛色为棕,黑,橙三色)共同躺在一款色彩鲜艳,条纹图案的圆形猫窝中.猫窝放在粉色床单上,背景中可以看到一个绿色和米色的包装盒,盒子上有中文文字,隐约可见"激光眼"等字样.整体氛围温馨舒适,体现了猫咪之间亲密的相处关系.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/008/LACode-008.py" target="_blank">LACode-008.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/008/LAResult-008.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/008/LAResult-008.jpg"></a></td>
+<td>4541ms</td><td>9.4GB</td>
+<td>真厉害,我自己看图的时候只注意到了两只猫猫,我还在想:哎,怎么三个框,角落又是奇怪框体么?定神细视:哎!角落里的猫猫都被精准识别出来了...感慨...</td>
+<td class="rate-hang">夯<sup>+</sup></td>
 </tr>
 <tr>
-  <td>009</td><td>person</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/009/original-009.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/009/original-009.jpg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/009/LACode-009.py" target="_blank">LACode-009.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/009/LAResult-009.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/009/LAResult-009.jpg"></a></td>
-  <td>5721ms</td><td>10.7GB</td><td>主体部分四个人识别出来了没问题,但是角落的"舞台装饰"被识别成人的头发?略微可惜</td><td class="rate-rsr">人上人</td>
+<td>009</td><td>person</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/009/original-009.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/009/original-009.jpg"></a></td>
+<td>850x1113</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/009/MCCode-009.py" target="_blank">MCCode-009.py</a></td>
+<td>2371ms</td>
+<td class="mc-desc">这张图片展示了一位风格华丽,充满梦幻色彩的动漫风格女性角色群像.画面中心是一位金发,穿着粉色紧身内衣,搭配白色羽毛装饰的女性,她坐在一只带有白色羽毛的椅子上,姿态优雅,周围散落着金币和心形气球,营造出浪漫又奢华的氛围.在她周围,还有三位造型各异的女性角色:左侧紫色双马尾角色;右侧紫色长发角色身着蓝色西装;左下角紫色长发角色穿着蓝色牛仔外套.背景由巨大的紫色水晶状几何结构构成,点缀着粉色和蓝色的心形气球.画面右下角有"KDA"字样.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/009/LACode-009.py" target="_blank">LACode-009.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/009/LAResult-009.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/009/LAResult-009.jpg"></a></td>
+<td>5721ms</td><td>10.7GB</td>
+<td>主体部分四个人识别出来了没问题,但是角落的"舞台装饰"被识别成人的头发?略微可惜</td>
+<td class="rate-rsr">人上人</td>
 </tr>
 <tr>
-  <td>010</td><td>chair</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/010/original-010.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/010/original-010.jpg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/010/LACode-010.py" target="_blank">LACode-010.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/010/LAResult-010.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/010/LAResult-010.jpg"></a></td>
-  <td>5724ms</td><td>11.5GB</td><td>已经逐渐熟练,连图边上的"椅子腿"都被识别出来了</td><td class="rate-hang">夯</td>
+<td>010</td><td>chair</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/010/original-010.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/010/original-010.jpg"></a></td>
+<td>2400x1080</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/010/MCCode-010.py" target="_blank">MCCode-010.py</a></td>
+<td>2178ms</td>
+<td class="mc-desc">这张图片展示了一个办公或仓储环境,有多把黑色网布办公椅,部分椅子被放置或移动,周围散落着纸箱和杂物.前景中有一把黑色网布办公椅,椅背和扶手清晰可见.左侧有一把黑色办公椅,椅背上放着一个打开的纸箱.中间位置有一把黑色网布办公椅,椅背直立.右侧有一把被翻倒或移动的办公椅.背景中还有一把完整的黑色网布办公椅.地面是浅灰色地毯,墙壁为白色,整体环境像是正在整理或拆卸办公家具.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/010/LACode-010.py" target="_blank">LACode-010.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/010/LAResult-010.jpg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/010/LAResult-010.jpg"></a></td>
+<td>5724ms</td><td>11.5GB</td>
+<td>已经逐渐熟练,连图边上的"椅子腿"都被识别出来了</td>
+<td class="rate-hang">夯</td>
 </tr>
 <tr>
-  <td>011</td><td>person</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/011/original-011.png" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/011/original-011.png"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/011/LACode-011.py" target="_blank">LACode-011.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/011/LAResult-011.png" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/011/LAResult-011.png"></a></td>
-  <td>4482ms</td><td>7.7GB</td><td>过于简单了,本来想寻找跳舞时候的动图,奈何比较难寻找到完美的五个人同框且不遮挡的图,就先这样吧</td><td class="rate-top">顶级</td>
+<td>011</td><td>person</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/011/original-011.png" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/011/original-011.png"></a></td>
+<td>640x422</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/011/MCCode-011.py" target="_blank">MCCode-011.py</a></td>
+<td>1281ms</td>
+<td class="mc-desc">这张图片展示了一组风格鲜明,造型时尚的女性角色,背景是充满未来感和科幻氛围的蓝色紫色灯光环境,带有几何晶体和动态光效.五位女性角色身着紧身,富有科技感的服装,包括高跟裤装,短裙,金属质感外套和猫耳装饰等,整体呈现出游戏或动漫中"虚拟偶像"或"竞技选手"的视觉风格.她们姿态各异,充满自信与活力,仿佛正准备参与一场激烈的对战或舞台表演.整体画面色彩鲜艳,光影效果突出.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/011/LACode-011.py" target="_blank">LACode-011.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/011/LAResult-011.png" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/011/LAResult-011.png"></a></td>
+<td>4482ms</td><td>7.7GB</td>
+<td>过于简单了,本来想寻找跳舞时候的动图,奈何比较难寻找到完美的五个人同框且不遮挡的图,就先这样吧</td>
+<td class="rate-top">顶级</td>
 </tr>
 <tr>
-  <td>012</td><td>tree</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/012/original-012.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/012/original-012.jpeg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/012/LACode-012.py" target="_blank">LACode-012.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/012/LAResult-012.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/012/LAResult-012.jpeg"></a></td>
-  <td>5536ms</td><td>8.7GB</td><td>红色框的树框体稍大,其他很好了</td><td class="rate-top">顶级</td>
+<td>012</td><td>tree</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/012/original-012.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/012/original-012.jpeg"></a></td>
+<td>613x980</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/012/MCCode-012.py" target="_blank">MCCode-012.py</a></td>
+<td>1028ms</td>
+<td class="mc-desc">这张图片展现了一幅宁静美丽的热带日落景象.几棵高大的椰子树矗立在绿茵茵的草地上,树影投射在地面上,与柔和的光线相映成趣.背景是绚烂的晚霞,天空被粉红,紫和橙色的云彩染得格外绚丽,太阳正缓缓沉入海平面,水面反射出耀眼的光斑,形成一条明亮的光带.整体氛围悠闲放松,充满热带海岛的诗意与治愈感.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/012/LACode-012.py" target="_blank">LACode-012.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/012/LAResult-012.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/012/LAResult-012.jpeg"></a></td>
+<td>5536ms</td><td>8.7GB</td>
+<td>红色框的树框体稍大,其他很好了</td>
+<td class="rate-top">顶级</td>
 </tr>
 <tr>
-  <td>013</td><td>marble</td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/013/original-013.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/013/original-013.jpeg"></a></td>
-  <td><a class="LACode-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/013/LACode-013.py" target="_blank">LACode-013.py</a></td>
-  <td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/013/LAResult-013.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/013/LAResult-013.jpeg"></a></td>
-  <td>4317ms</td><td>7.6GB</td><td>测试了多个关键词,最后好像"鹅卵石~pebbles"效果相对最好,但是依然不太好,边缘的鹅卵石识别效果一般</td><td class="rate-npc">NPC</td>
+<td>013</td><td>pebble</td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/013/original-013.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/013/original-013.jpeg"></a></td>
+<td>500x500</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/013/MCCode-013.py" target="_blank">MCCode-013.py</a></td>
+<td>886ms</td>
+<td class="mc-desc">这张图片展示了一堆形状圆润,表面光滑的天然石Pebbles(鹅卵石),颜色多样,包括米黄,棕褐,灰绿,深绿和少量红色或深蓝色.石面经过自然风化,呈现出柔和的纹理和光泽,整体看起来像是用于装饰或园林用途的碎石.背景为纯白色,突出了石头的自然色彩和质感.</td>
+<td><a class="code-link" href="https://github.com/zhxbayernfan/RealMagic02/blob/main/001-Result_Show/013/LACode-013.py" target="_blank">LACode-013.py</a></td>
+<td><a href="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/013/LAResult-013.jpeg" target="_blank"><img class="thumb" src="https://raw.githubusercontent.com/zhxbayernfan/RealMagic02/main/001-Result_Show/013/LAResult-013.jpeg"></a></td>
+<td>4317ms</td><td>7.6GB</td>
+<td>测试了多个关键词,最后好像"鹅卵石~pebbles"效果相对最好,但是依然不太好,边缘的鹅卵石识别效果一般</td>
+<td class="rate-npc">NPC</td>
 </tr>
 </tbody>
 </table>
