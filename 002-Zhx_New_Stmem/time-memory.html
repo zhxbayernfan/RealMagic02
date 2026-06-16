@@ -37,7 +37,7 @@
 <body>
   <div class="header">
     <h1>Stmem</h1>
-    <span>时间记忆平台</span>
+    <span>时间记忆平台（独立版）</span>
   </div>
   <div class="container">
     <div class="upload-box" id="uploadBox">
@@ -58,10 +58,11 @@
     </div>
   </div>
   <script>
-    const STMEM = location.origin;
     const LINUXC_API = 'http://192.168.0.100:11000';
     const MODEL = 'MiniCPM-V-4_6-Q4_K_M.gguf';
     const PROMPT = '请描述这张图片的具体内容，重点关注：人物（人数、外貌特征、穿着、具体动作）、物品（型号、颜色、位置）、场景变化（与空旷状态的不同之处）。忽略不变的背景描述，只描述画面中有特征的元素。如果画面为空场景，仅回复"空场景，无人无特殊物品"。';
+    const DB_NAME = 'StmemMemoryDB';
+    const STORE = 'frames';
 
     const uploadBox = document.getElementById('uploadBox');
     const fileInput = document.getElementById('fileInput');
@@ -85,6 +86,42 @@
       status.style.display = 'block';
     }
 
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE)) {
+            db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+          }
+        };
+        req.onsuccess = e => resolve(e.target.result);
+        req.onerror = e => reject(e.target.error);
+      });
+    }
+
+    async function saveFrame(base64, desc, model, elapsed, tokens) {
+      const db = await openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        const store = tx.objectStore(STORE);
+        store.add({ base64, description: desc, model, elapsed, tokens, time: new Date().toISOString() });
+        tx.oncomplete = () => resolve();
+        tx.onerror = e => reject(e.target.error);
+      });
+    }
+
+    async function loadFramesFromDB() {
+      const db = await openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readonly');
+        const store = tx.objectStore(STORE);
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = e => reject(e.target.error);
+      });
+    }
+
     async function fileToBase64(file) {
       return new Promise(resolve => {
         const reader = new FileReader();
@@ -97,7 +134,7 @@
       previewImg.src = URL.createObjectURL(file);
       preview.style.display = 'block';
       result.style.display = 'none';
-      setStatus('正在上传到 LinuxC 并调用 MiniCPM-V-4.6 识别...');
+      setStatus('正在调用 LinuxC MiniCPM-V-4.6 识别...');
 
       try {
         const base64 = await fileToBase64(file);
@@ -119,46 +156,41 @@
         const elapsed = Date.now() - t0;
         const desc = data.choices?.[0]?.message?.content || '无识别结果';
 
+        // 保存到 IndexedDB（完全本地，不依赖 stmem）
+        await saveFrame(base64, desc, MODEL, elapsed, data.usage?.total_tokens);
+
         resultText.textContent = desc;
-        resultMeta.textContent = `模型: ${MODEL} | 耗时: ${elapsed}ms | Token: ${data.usage?.total_tokens || '未知'}`;
+        resultMeta.textContent = '模型: ' + MODEL + ' | 耗时: ' + elapsed + 'ms | Token: ' + (data.usage?.total_tokens || '未知');
         result.style.display = 'block';
-        setStatus('识别完成！正在同步到 stmem 记忆库...');
+        setStatus('完成！已保存到本地记忆库。');
 
-        // 同步到 stmem frames 目录
-        const formData = new FormData();
-        formData.append('frame', file);
-        await fetch(STMEM + '/api/capture', { method: 'POST', body: formData });
-
-        setStatus('完成！');
-        setTimeout(loadFrames, 1000);
+        loadFrames();
 
       } catch (err) {
         setStatus('识别失败: ' + err.message, true);
       }
     }
 
-    function loadFrames() {
-      fetch(STMEM + '/api/frames')
-        .then(r => r.json())
-        .then(frames => {
-          frameList.innerHTML = '';
-          const list = Array.isArray(frames) ? frames : (frames.frames || []);
-          list.forEach(fr => {
-            const mem = fr.memory || {};
-            const card = document.createElement('div');
-            card.className = 'frame-card';
-            const desc = mem.description || '';
-            card.innerHTML = '<img src="' + (fr.thumbnail || '') + '" loading="lazy"><div class="desc">' + desc.slice(0, 80) + (desc.length > 80 ? '...' : '') + '</div><div class="time">' + (mem.captureTime ? new Date(mem.captureTime).toLocaleString('zh-CN') : '') + '</div>';
-            card.addEventListener('click', () => {
-              resultText.textContent = desc || '无描述';
-              resultMeta.textContent = '模型: ' + (mem.model || '未知') + ' | 耗时: ' + (mem.inferenceTime ? mem.inferenceTime + 'ms' : '未知') + ' | 时间: ' + (mem.captureTime ? new Date(mem.captureTime).toLocaleString('zh-CN') : '');
-              result.style.display = 'block';
-              result.scrollIntoView({ behavior: 'smooth' });
-            });
-            frameList.appendChild(card);
+    async function loadFrames() {
+      try {
+        const frames = await loadFramesFromDB();
+        frameList.innerHTML = '';
+        frames.slice().reverse().forEach(fr => {
+          const card = document.createElement('div');
+          card.className = 'frame-card';
+          const desc = fr.description || '';
+          card.innerHTML = '<img src="data:image/jpeg;base64,' + fr.base64 + '"><div class="desc">' + desc.slice(0, 80) + (desc.length > 80 ? '...' : '') + '</div><div class="time">' + (fr.time ? new Date(fr.time).toLocaleString('zh-CN') : '') + '</div>';
+          card.addEventListener('click', () => {
+            resultText.textContent = desc || '无描述';
+            resultMeta.textContent = '模型: ' + (fr.model || '未知') + ' | 耗时: ' + (fr.elapsed || '未知') + 'ms | 时间: ' + (fr.time ? new Date(fr.time).toLocaleString('zh-CN') : '');
+            result.style.display = 'block';
+            result.scrollIntoView({ behavior: 'smooth' });
           });
-        })
-        .catch(err => setStatus('加载失败: ' + err.message, true));
+          frameList.appendChild(card);
+        });
+      } catch (err) {
+        setStatus('加载失败: ' + err.message, true);
+      }
     }
 
     loadFrames();
