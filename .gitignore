@@ -2,3 +2,8 @@
 **/.DS_Store
 .DS_Store
 **/.DS_Store
+
+# Large generated data files
+002-Stmem_Psh_Zhx_ProJect/backend/dgsg/experiments/mydata/stream/params_with_idx.npz
+002-Stmem_Psh_Zhx_ProJect/backend/dgsg/experiments/mydata/lingbot/params_with_idx.npz
+002-Stmem_Psh_Zhx_ProJect/FastGS/datasets/lingbot_dense/sparse/0/points3D.bin

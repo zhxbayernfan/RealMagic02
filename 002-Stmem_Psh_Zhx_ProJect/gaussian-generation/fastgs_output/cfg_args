@@ -1,0 +1,1 @@
+Namespace(sh_degree=3, source_path='/home/sscy/lingbot-map/stmem-psh/gaussian-generation/fastgs_output', model_path='/home/sscy/lingbot-map/stmem-psh/gaussian-generation/fastgs_output', images='images', resolution=-1, white_background=False, data_device='cuda', eval=True)

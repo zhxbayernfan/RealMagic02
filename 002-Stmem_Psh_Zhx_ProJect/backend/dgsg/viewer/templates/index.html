@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Scene Graph Viewer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; color: #e0e0e0; }
+
+#selector-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.95);
+    display: flex; align-items: center; justify-content: center;
+}
+#selector-box {
+    background: #16213e; border-radius: 12px; padding: 40px;
+    min-width: 500px; max-width: 700px; max-height: 80vh;
+}
+#selector-box h1 { font-size: 22px; margin-bottom: 20px; color: #e94560; }
+#selector-box h2 { font-size: 14px; margin-bottom: 12px; color: #888; }
+.exp-list { list-style: none; max-height: 50vh; overflow-y: auto; }
+.exp-list li {
+    padding: 12px 16px; margin: 4px 0; border-radius: 8px;
+    background: #0f3460; cursor: pointer; transition: background 0.2s;
+    font-size: 14px; display: flex; align-items: center; gap: 10px;
+}
+.exp-list li:hover { background: #e94560; }
+.exp-list li.selected { background: rgba(233,69,96,0.3); border: 1px solid rgba(233,69,96,0.6); }
+.exp-list li .path { font-family: monospace; flex: 1; }
+.exp-list li .hint { color: #aaa; font-size: 12px; }
+.exp-list li input[type="checkbox"] { accent-color: #e94560; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+.exp-list::-webkit-scrollbar { width: 6px; }
+.exp-list::-webkit-scrollbar-thumb { background: #e94560; border-radius: 3px; }
+
+#selector-actions {
+    margin-top: 16px; display: flex; gap: 12px; align-items: center;
+}
+#sel-count { color: #888; font-size: 13px; }
+.action-btn {
+    padding: 8px 20px; border: none; border-radius: 6px;
+    cursor: pointer; font-size: 14px; display: none;
+}
+#btn-load { background: #e94560; color: #fff; }
+#btn-compare { background: #0f3460; color: #fff; border: 1px solid rgba(233,69,96,0.5) !important; }
+
+#canvas-container { position: fixed; inset: 0; z-index: 1; }
+#canvas-container canvas { display: block; width: 100%; height: 100%; }
+
+#loading-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center; flex-direction: column;
+}
+#loading-overlay.active { display: flex; }
+#loading-text { font-size: 18px; margin-bottom: 12px; }
+#loading-bar-bg { width: 300px; height: 6px; background: #333; border-radius: 3px; }
+#loading-bar { height: 100%; background: #e94560; border-radius: 3px; width: 0%; transition: width 0.15s; }
+#error-text { color: #e94560; font-size: 14px; margin-top: 16px; max-width: 400px; text-align: center; }
+
+/* Toolbar */
+#toolbar {
+    position: fixed; top: 12px; left: 12px; z-index: 200;
+    display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
+}
+#toolbar .tb-row { display: flex; gap: 8px; align-items: center; }
+
+/* Segmented control */
+.seg {
+    position: relative; display: flex;
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
+    background: rgba(0,0,0,0.15); backdrop-filter: blur(2px);
+    overflow: hidden;
+}
+.seg .seg-pill {
+    position: absolute; top: 2px; bottom: 2px; border-radius: 4px;
+    background: rgba(233,69,96,0.7);
+    transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+.seg .seg-item {
+    position: relative; z-index: 1;
+    padding: 4px 12px; font-size: 11px; color: #888;
+    cursor: pointer; user-select: none; transition: color 0.2s;
+    white-space: nowrap;
+}
+.seg .seg-item + .seg-item {
+    border-left: 1px solid rgba(255,255,255,0.12);
+}
+.seg .seg-item.active { color: #fff; }
+
+/* Simple toggle switch */
+.tb-toggle {
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+    background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px; padding: 4px 10px; backdrop-filter: blur(2px);
+    font-size: 11px; color: #888; user-select: none; transition: all 0.2s;
+}
+.tb-toggle:hover { color: #ccc; }
+.tb-toggle.on { color: #e0e0e0; border-color: rgba(233,69,96,0.5); }
+.tb-toggle .sw {
+    position: relative; width: 28px; height: 14px; border-radius: 7px;
+    background: #333; transition: background 0.2s; flex-shrink: 0;
+}
+.tb-toggle .sw::after {
+    content: ''; position: absolute; top: 1px; left: 1px;
+    width: 12px; height: 12px; border-radius: 6px;
+    background: #666; transition: all 0.2s;
+}
+.tb-toggle.on .sw { background: rgba(233,69,96,0.7); }
+.tb-toggle.on .sw::after { left: 15px; background: #fff; }
+
+/* Info Panel */
+#info-panel {
+    position: fixed; top: 0; right: 0; z-index: 200;
+    width: 380px; height: 100vh;
+    background: rgba(22, 33, 62, 0.2);
+    border-left: 1px solid rgba(255,255,255,0.08);
+    overflow-y: auto; padding: 24px;
+    display: none; backdrop-filter: blur(2px);
+}
+#info-panel.visible { display: block; }
+#info-panel .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 6px; }
+#info-panel .panel-header h2 { font-size: 18px; color: #e94560; flex: 1; min-width: 0; }
+#info-panel .panel-header .badge {
+    background: #e94560; color: #fff; border-radius: 4px;
+    padding: 2px 10px; font-size: 13px; white-space: nowrap;
+}
+#info-panel .panel-header .badge-vp {
+    background: #0f3460; color: #aaa; border-radius: 4px;
+    padding: 2px 10px; font-size: 12px; white-space: nowrap; display: none;
+}
+#info-panel .panel-close {
+    background: none; border: 1px solid #555; color: #aaa;
+    border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 14px;
+}
+#info-panel .panel-close:hover { border-color: #e94560; color: #e94560; }
+#info-panel .crop-img {
+    width: 100%; max-height: 200px; object-fit: contain;
+    border-radius: 8px; margin-bottom: 16px; background: #0a0a1a;
+}
+#info-panel .desc {
+    font-size: 13px; color: #bbb; line-height: 1.5;
+    margin-bottom: 16px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 6px;
+}
+#info-panel .detail-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid #222; font-size: 13px;
+}
+#info-panel .detail-row .label { color: #888; display: flex; align-items: center; gap: 6px; }
+#info-panel .detail-row .value { color: #e0e0e0; font-family: monospace; font-size: 12px; }
+#info-panel .section-title {
+    font-size: 14px; color: #e94560; margin: 16px 0 8px 0;
+    border-bottom: 1px solid #333; padding-bottom: 4px;
+}
+#info-panel .overlap-info {
+    background: rgba(233,69,96,0.15); border-radius: 6px; padding: 10px;
+    margin-bottom: 12px; font-size: 13px;
+}
+#info-panel .overlap-info .overlap-val { color: #e94560; font-weight: bold; }
+#info-panel .relation-item {
+    padding: 8px 10px; margin: 4px 0; background: rgba(0,0,0,0.2);
+    border-radius: 6px; cursor: pointer; transition: background 0.2s; font-size: 13px;
+}
+#info-panel .relation-item:hover { background: rgba(233,69,96,0.2); }
+#info-panel .relation-item .rel-target { color: #4ecdc4; font-weight: bold; }
+#info-panel .relation-item .rel-type { color: #e94560; }
+#info-panel .relation-item .rel-loc { color: #888; font-size: 12px; }
+
+/* Tooltip */
+#tooltip {
+    position: fixed; z-index: 300;
+    background: rgba(22,33,62,0.95); border: 1px solid #e94560;
+    border-radius: 6px; padding: 8px 12px;
+    font-size: 12px; pointer-events: none;
+    display: none; max-width: 300px; backdrop-filter: blur(5px);
+}
+#tooltip.visible { display: block; }
+#tooltip .tt-relation { color: #e94560; font-weight: bold; }
+#tooltip .tt-location { color: #4ecdc4; margin-top: 4px; }
+
+/* Legend (for solid color mode) */
+#legend {
+    position: fixed; bottom: 60px; left: 16px; z-index: 200;
+    background: rgba(22,33,62,0.85); border-radius: 8px;
+    padding: 10px 14px; font-size: 11px; color: #aaa;
+    max-height: 300px; overflow-y: auto; display: none;
+    backdrop-filter: blur(5px); min-width: 160px;
+}
+#legend.visible { display: block; }
+#legend .legend-item { display: flex; align-items: center; gap: 6px; margin: 3px 0; cursor: pointer; }
+#legend .legend-item:hover { color: #fff; }
+#legend .legend-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+
+/* Hotkeys */
+#hotkeys {
+    position: fixed; bottom: 16px; left: 16px; z-index: 200;
+    background: rgba(22,33,62,0.15); border-radius: 8px;
+    padding: 10px 16px; font-size: 11px; color: #666;
+    line-height: 1.8; backdrop-filter: blur(2px);
+}
+#hotkeys kbd {
+    background: #333; color: #aaa; border-radius: 3px;
+    padding: 1px 5px; font-size: 11px; font-family: monospace;
+}
+
+/* Viewport labels & borders */
+#viewport-labels {
+    position: fixed; inset: 0; z-index: 150;
+    pointer-events: none;
+}
+.vp-label {
+    position: absolute; top: 4px;
+    background: rgba(0,0,0,0.6);
+    color: #e0e0e0; font-size: 12px;
+    padding: 4px 12px; border-radius: 0 0 6px 6px;
+    text-align: center; pointer-events: none;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    backdrop-filter: blur(2px);
+}
+.vp-border-v {
+    position: absolute; top: 0; bottom: 0; width: 2px;
+    background: rgba(255,255,255,0.15); pointer-events: none;
+}
+.vp-border-h {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: rgba(255,255,255,0.15); pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div id="selector-overlay">
+  <div id="selector-box">
+    <h1>3D Scene Graph Viewer</h1>
+    <h2>Select experiment(s) to visualize:</h2>
+    <ul class="exp-list" id="exp-list"></ul>
+    <p id="no-exp-msg" style="display:none;color:#888;margin-top:16px;font-size:13px;">No experiments found.</p>
+    <div id="selector-actions">
+      <span id="sel-count"></span>
+      <button class="action-btn" id="btn-load">Load</button>
+      <button class="action-btn" id="btn-compare">Compare</button>
+    </div>
+  </div>
+</div>
+
+<div id="loading-overlay">
+  <div id="loading-text">Loading...</div>
+  <div id="loading-bar-bg"><div id="loading-bar"></div></div>
+  <div id="error-text"></div>
+</div>
+
+<div id="canvas-container"></div>
+<div id="viewport-labels"></div>
+
+<!-- Toolbar -->
+<div id="toolbar" style="display:none">
+  <div class="tb-row">
+    <div class="seg" id="seg-color">
+      <div class="seg-pill"></div>
+      <div class="seg-item active">Original</div>
+      <div class="seg-item">Solid</div>
+    </div>
+  </div>
+  <div class="tb-row">
+    <div class="seg" id="seg-mode">
+      <div class="seg-pill"></div>
+      <div class="seg-item active">Horizontal</div>
+      <div class="seg-item">View-Relative</div>
+    </div>
+  </div>
+  <div class="tb-row">
+    <div class="tb-toggle" id="sw-center">Centers<span class="sw"></span></div>
+    <div class="tb-toggle" id="sw-bbox">BBox<span class="sw"></span></div>
+  </div>
+  <div class="tb-row">
+    <span style="font-size:11px;color:#888;min-width:38px">Size</span>
+    <input type="range" id="point-size" min="1" max="50" value="15" step="1"
+      style="width:120px;accent-color:#e94560;cursor:pointer">
+    <span id="point-size-val" style="font-size:11px;color:#aaa;min-width:30px">0.015</span>
+  </div>
+</div>
+
+<!-- Info Panel -->
+<div id="info-panel">
+  <div class="panel-header">
+    <h2 id="panel-category">--</h2>
+    <span class="badge" id="panel-id">--</span>
+    <span class="badge badge-vp" id="panel-vp"></span>
+    <button class="panel-close" id="panel-close-btn">X</button>
+  </div>
+  <img class="crop-img" id="panel-crop" src="" alt="">
+  <div class="desc" id="panel-desc">--</div>
+  <div id="panel-details"></div>
+  <div id="panel-overlap"></div>
+  <div class="section-title">Relationships</div>
+  <div id="panel-relations"></div>
+</div>
+
+<div id="tooltip">
+  <div class="tt-relation" id="tt-relation"></div>
+  <div class="tt-location" id="tt-location"></div>
+</div>
+
+<div id="legend"></div>
+
+<div id="hotkeys">
+  <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><kbd>Q</kbd><kbd>E</kbd> Move |
+  Double-tap: Sprint | <kbd>F</kbd> Toggle Mode<br>
+  Left-drag: Rotate | Scroll: Move | <kbd>RMB</kbd> Select |
+  Shift+<kbd>RMB</kbd> Overlap | <kbd>R</kbd> Reset | <kbd>Esc</kbd> Switch
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+// ======================== VIEWPORT CLASS ========================
+class Viewport {
+    constructor(index) {
+        this.index = index;
+        this.expPath = '';
+        this.expLabel = '';
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x1a1a1a);
+        this.pointCloudGroup = new THREE.Group();
+        this.edgeLinesGroup = new THREE.Group();
+        this.centerMarkersGroup = new THREE.Group();
+        this.bboxGroup = new THREE.Group();
+        this.scene.add(this.pointCloudGroup, this.edgeLinesGroup,
+                       this.centerMarkersGroup, this.bboxGroup);
+        this.objectsMeshMap = new Map();
+        this.originalColors = new Map();
+        this.objectSolidColors = new Map();
+        this.sceneGraphNodes = new Map();
+        this.sceneGraphEdges = [];
+        this.selectedObjId = null;
+        this.secondSelectedId = null;
+        this.overlapData = null;
+        this.currentHighlightEdges = [];
+        this.allSelectionEdges = [];
+        this.activePairId = null;
+    }
+}
+
+// ======================== SHARED GLOBALS ========================
+let camera, renderer, clock;
+let viewports = [];
+let activeViewport = null;
+
+// Camera movement (shared)
+const moveState = { forward: false, backward: false, left: false, right: false, up: false, down: false };
+const keyLastPress = {};
+const keyWasReleased = {};
+const keyAccelerated = {};
+const velocity = new THREE.Vector3();
+const targetEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+const currentEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+let isDragging = false;
+let lastMouseX = 0, lastMouseY = 0;
+let isResetting = false;
+let resetProgress = 0;
+const resetFrom = { pos: new THREE.Vector3(), euler: new THREE.Euler(0, 0, 0, 'YXZ') };
+const RESET_DURATION = 0.8;
+let viewRelativeMode = false;
+
+const BASE_SPEED = 2.0;
+const SPRINT_SPEED = 8.0;
+const DAMPING = 25.0;
+const MOUSE_SENSITIVITY = 0.003;
+const DEFAULT_FOV = 50;
+
+// Global toggles
+let colorMode = 'original';
+let showBbox = false;
+let showCenter = false;
+
+// ======================== VIEWPORT LAYOUT ========================
+function getViewportLayouts(count) {
+    switch (count) {
+        case 1: return [{ x:0, y:0, w:1, h:1 }];
+        case 2: return [{ x:0, y:0, w:0.5, h:1 }, { x:0.5, y:0, w:0.5, h:1 }];
+        case 3: return [{ x:0, y:0, w:1/3, h:1 }, { x:1/3, y:0, w:1/3, h:1 }, { x:2/3, y:0, w:1/3, h:1 }];
+        case 4: return [
+            { x:0, y:0.5, w:0.5, h:0.5 }, { x:0.5, y:0.5, w:0.5, h:0.5 },
+            { x:0, y:0, w:0.5, h:0.5 }, { x:0.5, y:0, w:0.5, h:0.5 }
+        ];
+        default: return [{ x:0, y:0, w:1, h:1 }];
+    }
+}
+
+function getViewportAtScreenPos(cx, cy) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const nx = (cx - rect.left) / rect.width;
+    const ny = 1 - (cy - rect.top) / rect.height;
+    const layouts = getViewportLayouts(viewports.length);
+    for (let i = 0; i < layouts.length; i++) {
+        const l = layouts[i];
+        if (nx >= l.x && nx < l.x + l.w && ny >= l.y && ny < l.y + l.h) {
+            return viewports[i];
+        }
+    }
+    return viewports[0];
+}
+
+// ======================== UTILITY ========================
+function clearGroup(group) {
+    while (group.children.length > 0) {
+        const c = group.children[0];
+        if (c.geometry) c.geometry.dispose();
+        if (c.material) c.material.dispose();
+        group.remove(c);
+    }
+}
+
+function makeCircleTexture() {
+    const size = 64, c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const ctx = c.getContext('2d'), half = size / 2;
+    const grad = ctx.createRadialGradient(half, half, 0, half, half, half);
+    grad.addColorStop(0.0, 'rgba(255,255,255,1.0)');
+    grad.addColorStop(0.88, 'rgba(255,255,255,1.0)');
+    grad.addColorStop(1.0, 'rgba(255,255,255,0.0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.LinearSRGBColorSpace;
+    tex.needsUpdate = true;
+    return tex;
+}
+
+function hslToRgb(h, s, l) {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
+    let r, g, b;
+    if (h < 60) { r=c; g=x; b=0; }
+    else if (h < 120) { r=x; g=c; b=0; }
+    else if (h < 180) { r=0; g=c; b=x; }
+    else if (h < 240) { r=0; g=x; b=c; }
+    else if (h < 300) { r=x; g=0; b=c; }
+    else { r=c; g=0; b=x; }
+    return new THREE.Color(r + m, g + m, b + m);
+}
+
+function assignSolidColors(vp, objectIds) {
+    const GOLDEN_ANGLE = 137.508;
+    objectIds.forEach((id, i) => {
+        const hue = (i * GOLDEN_ANGLE) % 360;
+        vp.objectSolidColors.set(id, hslToRgb(hue, 0.85, 0.55));
+    });
+}
+
+function isBackground(id) { return id === 0; }
+
+function brightenMesh(mesh, factor) {
+    const arr = mesh.geometry.getAttribute('color').array;
+    for (let i = 0; i < arr.length; i++) {
+        arr[i] = Math.min(arr[i] * factor, 1.0);
+    }
+    mesh.geometry.getAttribute('color').needsUpdate = true;
+}
+
+function setMeshColor(mesh, color) {
+    const arr = mesh.geometry.getAttribute('color').array;
+    for (let i = 0; i < arr.length; i += 3) { arr[i] = color.r; arr[i+1] = color.g; arr[i+2] = color.b; }
+    mesh.geometry.getAttribute('color').needsUpdate = true;
+}
+
+const circleTexture = makeCircleTexture();
+
+// ======================== MARKERS & BBOX ========================
+function refreshMarkers(vp) {
+    clearGroup(vp.centerMarkersGroup);
+    clearGroup(vp.bboxGroup);
+    if (!showCenter && !showBbox) return;
+
+    const activeIds = [];
+    for (const [id, mesh] of vp.objectsMeshMap) {
+        if (mesh.material.opacity > 0.5) activeIds.push(id);
+    }
+    if (activeIds.length === 0) return;
+    const allActive = activeIds.length === vp.objectsMeshMap.size;
+
+    if (showCenter) {
+        const geo = new THREE.SphereGeometry(0.06, 12, 8);
+        for (const id of activeIds) {
+            const node = vp.sceneGraphNodes.get(id);
+            if (!node || !node.center) continue;
+            const color = allActive ? 0x00ff00 : (id === vp.selectedObjId ? 0xff0000 : 0x00ff00);
+            const mat = new THREE.MeshBasicMaterial({ color, depthTest: false, transparent: true, opacity: 0.9 });
+            const m = new THREE.Mesh(geo, mat);
+            m.position.set(node.center[0], -node.center[1], -node.center[2]);
+            m.renderOrder = 999;
+            m.userData.objId = id;
+            vp.centerMarkersGroup.add(m);
+        }
+    }
+
+    if (showBbox) {
+        for (const id of activeIds) {
+            const color = allActive ? 0x00ff00 : (id === vp.selectedObjId ? 0xff0000 : 0x00ff00);
+            addBboxWireframe(vp, id, color);
+        }
+    }
+}
+
+function makeBboxVerts(node) {
+    const [mn, mx] = node.bbox;
+    const x0=mn[0], y0=-mx[1], z0=-mx[2];
+    const x1=mx[0], y1=-mn[1], z1=-mn[2];
+    return [
+        x0,y0,z0, x1,y0,z0,  x1,y0,z0, x1,y0,z1,  x1,y0,z1, x0,y0,z1,  x0,y0,z1, x0,y0,z0,
+        x0,y1,z0, x1,y1,z0,  x1,y1,z0, x1,y1,z1,  x1,y1,z1, x0,y1,z1,  x0,y1,z1, x0,y1,z0,
+        x0,y0,z0, x0,y1,z0,  x1,y0,z0, x1,y1,z0,  x1,y0,z1, x1,y1,z1,  x0,y0,z1, x0,y1,z1,
+    ];
+}
+
+function addBboxWireframe(vp, objId, color) {
+    const node = vp.sceneGraphNodes.get(objId);
+    if (!node || !node.bbox) return;
+    const verts = makeBboxVerts(node);
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+    const lines = new THREE.LineSegments(geom, new THREE.LineBasicMaterial({ color }));
+    lines.userData.objId = objId;
+    vp.bboxGroup.add(lines);
+}
+
+// ======================== SELECTOR ========================
+const selectorOverlay = document.getElementById('selector-overlay');
+const expList = document.getElementById('exp-list');
+let _cachedExps = [];
+let _selectedExps = new Set();
+
+async function loadExperiments() {
+    try {
+        const resp = await fetch('/api/experiments');
+        _cachedExps = await resp.json();
+        if (_cachedExps.length === 0) { document.getElementById('no-exp-msg').style.display = 'block'; return; }
+        expList.innerHTML = '';
+        for (const exp of _cachedExps) {
+            const li = document.createElement('li');
+            li.innerHTML = `<input type="checkbox" data-exp="${exp}"><span class="path">${exp}</span><span class="hint">click or check</span>`;
+            li.addEventListener('click', (e) => {
+                if (e.target.type === 'checkbox') return;
+                startComparison([exp]);
+            });
+            const cb = li.querySelector('input[type="checkbox"]');
+            cb.addEventListener('change', (e) => {
+                e.stopPropagation();
+                if (cb.checked) {
+                    if (_selectedExps.size >= 4) { cb.checked = false; return; }
+                    _selectedExps.add(exp);
+                    li.classList.add('selected');
+                } else {
+                    _selectedExps.delete(exp);
+                    li.classList.remove('selected');
+                }
+                updateSelectorButtons();
+            });
+            expList.appendChild(li);
+        }
+    } catch (e) { console.error(e); }
+}
+
+function updateSelectorButtons() {
+    const count = _selectedExps.size;
+    document.getElementById('sel-count').textContent = count > 0 ? `${count} selected` : '';
+    document.getElementById('btn-load').style.display = count === 1 ? 'inline-block' : 'none';
+    document.getElementById('btn-compare').style.display = (count >= 2 && count <= 4) ? 'inline-block' : 'none';
+}
+
+// ======================== THREE.JS INIT ========================
+function initThree() {
+    const container = document.getElementById('canvas-container');
+    camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 0.05, 200);
+    camera.position.set(0, 0, 0);
+    currentEuler.set(0, 0, 0, 'YXZ');
+    targetEuler.set(0, 0, 0, 'YXZ');
+    camera.quaternion.setFromEuler(currentEuler);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+    container.appendChild(renderer.domElement);
+
+    clock = new THREE.Clock();
+
+    window.addEventListener('resize', () => {
+        if (!camera || !renderer) return;
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        updateViewportLabels();
+    });
+}
+
+function resetCamera() {
+    resetFrom.pos.copy(camera.position);
+    resetFrom.euler.set(currentEuler.x, currentEuler.y, currentEuler.z, 'YXZ');
+    isResetting = true;
+    resetProgress = 0;
+    velocity.set(0, 0, 0);
+    moveState.forward = moveState.backward = moveState.left = moveState.right = moveState.up = moveState.down = false;
+}
+
+// ======================== DATA LOADING ========================
+async function loadViewportData(vp, onProgress) {
+    const checkResp = await fetch(`/api/check?exp=${encodeURIComponent(vp.expPath)}`);
+    const checkData = await checkResp.json();
+    if (!checkData.ok) return { ok: false, error: checkData.error };
+
+    const [sgResp, objResp] = await Promise.all([
+        fetch(`/api/scene_graph?exp=${encodeURIComponent(vp.expPath)}`),
+        fetch(`/api/objects?exp=${encodeURIComponent(vp.expPath)}`),
+    ]);
+    if (!sgResp.ok || !objResp.ok) return { ok: false, error: 'Failed to load data' };
+    const sceneGraph = await sgResp.json();
+    const objectsMeta = await objResp.json();
+    console.log(`[VP${vp.index}] ${objectsMeta.length} objects, ${sceneGraph.nodes.length} nodes`);
+
+    vp.sceneGraphNodes.clear();
+    for (const node of sceneGraph.nodes) vp.sceneGraphNodes.set(node.idx, node);
+    vp.sceneGraphEdges = sceneGraph.edges || [];
+    assignSolidColors(vp, objectsMeta.filter(o => o.id !== 0).map(o => o.id));
+
+    const total = objectsMeta.length;
+    let loadedOk = 0, loadedFail = 0;
+    const CONCURRENCY = 6, queue = [...objectsMeta], workers = [];
+    async function loadNext() {
+        while (queue.length > 0) {
+            const obj = queue.shift();
+            try {
+                const resp = await fetch(`/api/points/${obj.id}?exp=${encodeURIComponent(vp.expPath)}`);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const buf = await resp.arrayBuffer();
+                if (buf.byteLength < 4) throw new Error('Empty');
+                const n = new DataView(buf).getUint32(0, true);
+                const xyzF32 = new Float32Array(buf, 4, n * 3);
+                const rgbF32 = new Float32Array(buf, 4 + n * 12, n * 3);
+                createPointsMesh(vp, obj.id, xyzF32, rgbF32);
+                loadedOk++;
+            } catch (e) { loadedFail++; console.warn(`[VP${vp.index}] Object ${obj.id} (${vp.expPath}):`, e); }
+            if (onProgress) onProgress();
+        }
+    }
+    for (let i = 0; i < Math.min(CONCURRENCY, total); i++) workers.push(loadNext());
+    await Promise.all(workers);
+    console.log(`[VP${vp.index}] Done: ${loadedOk} ok, ${loadedFail} fail`);
+    return { ok: true };
+}
+
+function createPointsMesh(vp, objId, xyzF32, rgbF32) {
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(xyzF32.length);
+    for (let i = 0; i < xyzF32.length; i += 3) {
+        positions[i] = xyzF32[i];
+        positions[i + 1] = -xyzF32[i + 1];
+        positions[i + 2] = -xyzF32[i + 2];
+    }
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const colorArr = new Float32Array(rgbF32);
+    geometry.setAttribute('color', new THREE.BufferAttribute(colorArr, 3));
+
+    const material = new THREE.PointsMaterial({
+        size: 0.015, sizeAttenuation: true, vertexColors: true,
+        alphaTest: 0.5, map: circleTexture, depthWrite: true,
+    });
+    const points = new THREE.Points(geometry, material);
+    points.userData.objId = objId;
+    vp.pointCloudGroup.add(points);
+    vp.objectsMeshMap.set(objId, points);
+    vp.originalColors.set(objId, new Float32Array(colorArr));
+}
+
+// ======================== CONTROLS ========================
+function setupControls() {
+    const canvas = renderer.domElement;
+
+    document.addEventListener('keydown', (e) => {
+        if (e.repeat) return;
+        const key = e.code, now = performance.now();
+        if (keyWasReleased[key] && keyLastPress[key] && (now - keyLastPress[key]) < 200)
+            keyAccelerated[key] = true;
+        keyLastPress[key] = now;
+        keyWasReleased[key] = false;
+        switch (key) {
+            case 'KeyW': moveState.forward = true; break;
+            case 'KeyS': moveState.backward = true; break;
+            case 'KeyA': moveState.left = true; break;
+            case 'KeyD': moveState.right = true; break;
+            case 'KeyQ': moveState.up = true; break;
+            case 'KeyE': moveState.down = true; break;
+            case 'KeyR': resetCamera(); break;
+            case 'KeyF': viewRelativeMode = !viewRelativeMode;
+                document.getElementById('seg-mode')._setIndex(viewRelativeMode ? 1 : 0);
+                break;
+            case 'Escape':
+                if (_threeInitialized) {
+                    selectorOverlay.style.display = 'flex';
+                    clearAllViewports();
+                }
+                break;
+        }
+    });
+    document.addEventListener('keyup', (e) => {
+        const key = e.code;
+        keyWasReleased[key] = true;
+        keyAccelerated[key] = false;
+        switch (key) {
+            case 'KeyW': moveState.forward = false; break;
+            case 'KeyS': moveState.backward = false; break;
+            case 'KeyA': moveState.left = false; break;
+            case 'KeyD': moveState.right = false; break;
+            case 'KeyQ': moveState.up = false; break;
+            case 'KeyE': moveState.down = false; break;
+        }
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+        if (e.button === 0) { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; }
+    });
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            targetEuler.y -= (e.clientX - lastMouseX) * MOUSE_SENSITIVITY;
+            targetEuler.x -= (e.clientY - lastMouseY) * MOUSE_SENSITIVITY;
+            targetEuler.x = Math.max(-Math.PI/2+0.01, Math.min(Math.PI/2-0.01, targetEuler.x));
+            lastMouseX = e.clientX; lastMouseY = e.clientY;
+        }
+        if (!isDragging && activeViewport && activeViewport.currentHighlightEdges.length > 0) {
+            updateEdgeTooltip(activeViewport, e);
+        }
+    });
+    document.addEventListener('mouseup', (e) => { if (e.button === 0) isDragging = false; });
+
+    canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const vp = getViewportAtScreenPos(e.clientX, e.clientY);
+        if (!vp) return;
+        activeViewport = vp;
+        const hitId = pickObject(vp, e.clientX, e.clientY);
+        if (e.shiftKey && vp.selectedObjId && hitId && hitId !== vp.selectedObjId) {
+            if (vp.secondSelectedId === hitId) {
+                clearOverlapSelection(vp);
+                // Restore normal selection highlight
+                selectObject(vp, vp.selectedObjId);
+            } else {
+                selectOverlap(vp, hitId);
+            }
+        } else {
+            clearOverlapSelection(vp);
+            if (hitId) {
+                if (vp.selectedObjId === hitId) deselectObject(vp);
+                else selectObject(vp, hitId);
+            } else {
+                deselectObject(vp);
+            }
+        }
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const dir = new THREE.Vector3();
+        camera.getWorldDirection(dir);
+        camera.position.addScaledVector(dir, -e.deltaY * 0.005);
+    }, { passive: false });
+
+    document.getElementById('panel-close-btn').addEventListener('click', () => {
+        if (activeViewport) deselectObject(activeViewport);
+    });
+
+    initSegment('seg-color', (idx) => setColorMode(idx === 0 ? 'original' : 'solid'));
+    initSegment('seg-mode', (idx) => { viewRelativeMode = idx === 1; });
+
+    document.getElementById('sw-center').addEventListener('click', () => {
+        showCenter = !showCenter;
+        document.getElementById('sw-center').classList.toggle('on', showCenter);
+        for (const vp of viewports) refreshMarkers(vp);
+    });
+    document.getElementById('sw-bbox').addEventListener('click', () => {
+        showBbox = !showBbox;
+        document.getElementById('sw-bbox').classList.toggle('on', showBbox);
+        for (const vp of viewports) refreshMarkers(vp);
+    });
+    document.getElementById('point-size').addEventListener('input', (e) => {
+        const size = parseInt(e.target.value) / 1000;
+        document.getElementById('point-size-val').textContent = size.toFixed(3);
+        for (const vp of viewports) {
+            for (const [id, mesh] of vp.objectsMeshMap) {
+                mesh.material.size = size;
+            }
+        }
+    });
+}
+
+function initSegment(containerId, onChange) {
+    const el = document.getElementById(containerId);
+    const items = el.querySelectorAll('.seg-item');
+    const pill = el.querySelector('.seg-pill');
+
+    function positionPill(idx) {
+        const item = items[idx];
+        pill.style.left = item.offsetLeft + 'px';
+        pill.style.width = item.offsetWidth + 'px';
+        items.forEach((it, i) => it.classList.toggle('active', i === idx));
+    }
+    requestAnimationFrame(() => positionPill(0));
+    items.forEach((item, idx) => {
+        item.addEventListener('click', () => { positionPill(idx); onChange(idx); });
+    });
+    el._setIndex = (idx) => requestAnimationFrame(() => positionPill(idx));
+}
+
+// ======================== MOVEMENT ========================
+function updateMovement(delta) {
+    const accel = new THREE.Vector3(0, 0, 0);
+    const spd = (key) => keyAccelerated[key] ? SPRINT_SPEED : BASE_SPEED;
+
+    if (viewRelativeMode) {
+        const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd);
+        const rt = new THREE.Vector3(); rt.setFromMatrixColumn(camera.matrixWorld, 0).normalize();
+        const up = new THREE.Vector3(); up.setFromMatrixColumn(camera.matrixWorld, 1).normalize();
+        if (moveState.forward) accel.add(fwd.clone().multiplyScalar(spd('KeyW')));
+        if (moveState.backward) accel.add(fwd.clone().multiplyScalar(-spd('KeyS')));
+        if (moveState.right) accel.add(rt.clone().multiplyScalar(spd('KeyD')));
+        if (moveState.left) accel.add(rt.clone().multiplyScalar(-spd('KeyA')));
+        if (moveState.up) accel.add(up.clone().multiplyScalar(spd('KeyQ')));
+        if (moveState.down) accel.add(up.clone().multiplyScalar(-spd('KeyE')));
+    } else {
+        const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
+        const rt = new THREE.Vector3(); rt.crossVectors(fwd, new THREE.Vector3(0,1,0)).normalize();
+        if (moveState.forward) accel.add(fwd.clone().multiplyScalar(spd('KeyW')));
+        if (moveState.backward) accel.add(fwd.clone().multiplyScalar(-spd('KeyS')));
+        if (moveState.right) accel.add(rt.clone().multiplyScalar(spd('KeyD')));
+        if (moveState.left) accel.add(rt.clone().multiplyScalar(-spd('KeyA')));
+        if (moveState.up) accel.y += spd('KeyQ');
+        if (moveState.down) accel.y -= spd('KeyE');
+    }
+    velocity.lerp(accel, Math.min(1, DAMPING * delta));
+    camera.position.add(velocity.clone().multiplyScalar(delta));
+}
+
+function updateCameraRotation(delta) {
+    const rotLerp = 1.0 - Math.pow(0.001, delta);
+    currentEuler.x += (targetEuler.x - currentEuler.x) * rotLerp;
+    currentEuler.y += (targetEuler.y - currentEuler.y) * rotLerp;
+    camera.quaternion.setFromEuler(currentEuler);
+}
+
+function updateReset(delta) {
+    if (!isResetting) return;
+    resetProgress += delta / RESET_DURATION;
+    if (resetProgress >= 1.0) { resetProgress = 1.0; isResetting = false; }
+    const t = resetProgress;
+    const ease = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3) / 2;
+    camera.position.lerpVectors(resetFrom.pos, new THREE.Vector3(0,0,0), ease);
+    currentEuler.x = resetFrom.euler.x * (1 - ease);
+    currentEuler.y = resetFrom.euler.y * (1 - ease);
+    targetEuler.set(currentEuler.x, currentEuler.y, 0, 'YXZ');
+    camera.quaternion.setFromEuler(currentEuler);
+}
+
+// ======================== PICKING ========================
+const raycaster = new THREE.Raycaster();
+raycaster.params.Points.threshold = 0.15;
+raycaster.params.Line = { threshold: 0.15 };
+
+function pickObject(vp, cx, cy) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const nx = (cx - rect.left) / rect.width;
+    const ny = (cy - rect.top) / rect.height;
+    const l = getViewportLayouts(viewports.length)[vp.index];
+    const localNx = ((nx - l.x) / l.w) * 2 - 1;
+    const localNy = -(((ny - (1 - l.y - l.h)) / l.h) * 2 - 1);
+    raycaster.setFromCamera(new THREE.Vector2(localNx, localNy), camera);
+    const validId = h => h.object.userData.objId !== undefined && h.object.userData.objId !== 0;
+    // Markers (center spheres, bbox) take priority over point cloud
+    const markerHits = raycaster.intersectObjects([vp.centerMarkersGroup, vp.bboxGroup], true);
+    const markerHit = markerHits.find(validId);
+    if (markerHit) return markerHit.object.userData.objId;
+    // Fall back to point cloud — majority-vote: pick object with most ray hits
+    const cloudHits = raycaster.intersectObjects([vp.pointCloudGroup], true);
+    const hitCounts = new Map();
+    for (const h of cloudHits) {
+        const id = h.object.userData.objId;
+        if (id !== undefined && id !== 0) {
+            hitCounts.set(id, (hitCounts.get(id) || 0) + 1);
+        }
+    }
+    let bestId = null, bestCount = 0;
+    for (const [id, c] of hitCounts) {
+        if (c > bestCount) { bestCount = c; bestId = id; }
+    }
+    return bestId;
+}
+
+// ======================== COLOR MODE ========================
+function setColorMode(mode) {
+    colorMode = mode;
+    document.getElementById('seg-color')._setIndex(mode === 'original' ? 0 : 1);
+    for (const vp of viewports) {
+        for (const [id, mesh] of vp.objectsMeshMap) {
+            if (isBackground(id)) continue;
+            const colors = mesh.geometry.getAttribute('color');
+            if (mode === 'original') {
+                const orig = vp.originalColors.get(id);
+                if (orig) colors.array.set(orig);
+            } else {
+                const c = vp.objectSolidColors.get(id);
+                if (c) setMeshColor(mesh, c);
+            }
+            colors.needsUpdate = true;
+        }
+        if (vp.overlapData && vp.selectedObjId && vp.secondSelectedId) {
+            applyOverlapColors(vp, vp.selectedObjId, vp.secondSelectedId, vp.overlapData);
+        } else if (vp.selectedObjId) {
+            const relatedIds = new Set();
+            for (const edge of vp.sceneGraphEdges) {
+                if (edge.obj1 === vp.selectedObjId || edge.obj2 === vp.selectedObjId) {
+                    relatedIds.add(edge.obj1); relatedIds.add(edge.obj2);
+                }
+            }
+            relatedIds.delete(vp.selectedObjId);
+            for (const [id, mesh] of vp.objectsMeshMap) {
+                const isRelated = id === vp.selectedObjId || relatedIds.has(id);
+                mesh.material.opacity = isRelated ? 1.0 : 0.08;
+                if (isRelated && !isBackground(id)) brightenMesh(mesh, 1.7);
+            }
+        }
+    }
+    updateLegend(activeViewport);
+}
+
+// ======================== SELECTION ========================
+const COLOR_OVERLAP_SHARED = new THREE.Color(0.8, 0.2, 0.8);
+
+function selectObject(vp, objId) {
+    clearHighlight(vp);
+    vp.selectedObjId = objId;
+    vp.activePairId = null;
+
+    const relatedIds = new Set();
+    vp.currentHighlightEdges = [];
+    vp.allSelectionEdges = [];
+    for (const edge of vp.sceneGraphEdges) {
+        if (edge.obj1 === objId || edge.obj2 === objId) {
+            relatedIds.add(edge.obj1); relatedIds.add(edge.obj2);
+            vp.currentHighlightEdges.push(edge);
+            vp.allSelectionEdges.push(edge);
+        }
+    }
+    relatedIds.delete(objId);
+
+    for (const [id, mesh] of vp.objectsMeshMap) {
+        const isRelated = id === objId || relatedIds.has(id);
+        if (!isBackground(id)) {
+            if (colorMode === 'original') {
+                const orig = vp.originalColors.get(id);
+                if (orig) { mesh.geometry.getAttribute('color').array.set(orig); mesh.geometry.getAttribute('color').needsUpdate = true; }
+            } else {
+                const c = vp.objectSolidColors.get(id);
+                if (c) setMeshColor(mesh, c);
+            }
+        }
+        mesh.material.opacity = isRelated ? 1.0 : 0.08;
+        if (isRelated && !isBackground(id)) brightenMesh(mesh, 1.7);
+    }
+
+    showEdges(vp, vp.currentHighlightEdges);
+    refreshMarkers(vp);
+    showInfoPanel(vp, objId);
+    updateLegend(vp);
+}
+
+function selectObjectByRelation(vp, obj1, obj2) {
+    clearHighlight(vp);
+    vp.selectedObjId = obj1;
+    vp.activePairId = obj2;
+
+    vp.currentHighlightEdges = [];
+    const pairEdge = vp.sceneGraphEdges.find(e =>
+        (e.obj1 === obj1 && e.obj2 === obj2) || (e.obj1 === obj2 && e.obj2 === obj1));
+    if (pairEdge) vp.currentHighlightEdges = [pairEdge];
+
+    for (const [id, mesh] of vp.objectsMeshMap) {
+        const isRelevant = id === obj1 || id === obj2;
+        if (!isBackground(id)) {
+            if (colorMode === 'original') {
+                const orig = vp.originalColors.get(id);
+                if (orig) { mesh.geometry.getAttribute('color').array.set(orig); mesh.geometry.getAttribute('color').needsUpdate = true; }
+            } else {
+                const c = vp.objectSolidColors.get(id);
+                if (c) setMeshColor(mesh, c);
+            }
+        }
+        mesh.material.opacity = isRelevant ? 1.0 : 0.08;
+        if (isRelevant && !isBackground(id)) brightenMesh(mesh, 1.7);
+    }
+    showEdges(vp, vp.currentHighlightEdges);
+    refreshMarkers(vp);
+    showInfoPanel(vp, obj1, obj2);
+    updateLegend(vp);
+}
+
+function deselectObject(vp) {
+    vp.selectedObjId = null;
+    vp.activePairId = null;
+    vp.currentHighlightEdges = [];
+    vp.allSelectionEdges = [];
+    clearHighlight(vp);
+    clearOverlapSelection(vp);
+    refreshMarkers(vp);
+    if (vp === activeViewport) {
+        document.getElementById('info-panel').classList.remove('visible');
+    }
+    updateLegend(vp);
+}
+
+function clearHighlight(vp) {
+    for (const [id, mesh] of vp.objectsMeshMap) {
+        if (!isBackground(id)) {
+            if (colorMode === 'original') {
+                const orig = vp.originalColors.get(id);
+                if (orig) { mesh.geometry.getAttribute('color').array.set(orig); mesh.geometry.getAttribute('color').needsUpdate = true; }
+            } else {
+                const c = vp.objectSolidColors.get(id);
+                if (c) setMeshColor(mesh, c);
+            }
+        }
+        mesh.material.opacity = 0.9;
+        mesh.visible = true;
+    }
+    clearGroup(vp.centerMarkersGroup);
+    clearGroup(vp.edgeLinesGroup);
+    clearGroup(vp.bboxGroup);
+}
+
+// ======================== OVERLAP ========================
+function applyOverlapColors(vp, id1, id2, data) {
+    const mesh1 = vp.objectsMeshMap.get(id1);
+    const mesh2 = vp.objectsMeshMap.get(id2);
+
+    if (mesh1) {
+        if (colorMode === 'original') {
+            const orig = vp.originalColors.get(id1);
+            if (orig) mesh1.geometry.getAttribute('color').array.set(orig);
+        } else {
+            const c = vp.objectSolidColors.get(id1);
+            if (c) setMeshColor(mesh1, c);
+        }
+        brightenMesh(mesh1, 1.7);
+        const arr1 = mesh1.geometry.getAttribute('color').array;
+        for (const idx of data.indices_1) {
+            arr1[idx*3] = COLOR_OVERLAP_SHARED.r;
+            arr1[idx*3+1] = COLOR_OVERLAP_SHARED.g;
+            arr1[idx*3+2] = COLOR_OVERLAP_SHARED.b;
+        }
+        mesh1.geometry.getAttribute('color').needsUpdate = true;
+        mesh1.material.opacity = 1.0;
+    }
+
+    if (mesh2) {
+        if (colorMode === 'original') {
+            const orig = vp.originalColors.get(id2);
+            if (orig) mesh2.geometry.getAttribute('color').array.set(orig);
+        } else {
+            const c = vp.objectSolidColors.get(id2);
+            if (c) setMeshColor(mesh2, c);
+        }
+        brightenMesh(mesh2, 1.7);
+        const arr2 = mesh2.geometry.getAttribute('color').array;
+        for (const idx of data.indices_2) {
+            arr2[idx*3] = COLOR_OVERLAP_SHARED.r;
+            arr2[idx*3+1] = COLOR_OVERLAP_SHARED.g;
+            arr2[idx*3+2] = COLOR_OVERLAP_SHARED.b;
+        }
+        mesh2.geometry.getAttribute('color').needsUpdate = true;
+        mesh2.material.opacity = 1.0;
+    }
+}
+
+async function selectOverlap(vp, objId2) {
+    vp.secondSelectedId = objId2;
+    if (!vp.selectedObjId) return;
+
+    const resp = await fetch(`/api/overlap?exp=${encodeURIComponent(vp.expPath)}&id1=${vp.selectedObjId}&id2=${objId2}`);
+    vp.overlapData = await resp.json();
+
+    for (const [id, mesh] of vp.objectsMeshMap) {
+        const isRelevant = id === vp.selectedObjId || id === objId2;
+        mesh.material.opacity = isRelevant ? 1.0 : 0.08;
+    }
+
+    applyOverlapColors(vp, vp.selectedObjId, objId2, vp.overlapData);
+
+    const pairEdge = vp.sceneGraphEdges.find(e =>
+        (e.obj1 === vp.selectedObjId && e.obj2 === objId2) || (e.obj1 === objId2 && e.obj2 === vp.selectedObjId));
+    showEdges(vp, pairEdge ? [pairEdge] : []);
+    refreshMarkers(vp);
+    showInfoPanel(vp, vp.selectedObjId, objId2);
+    updateLegend(vp);
+}
+
+function clearOverlapSelection(vp) {
+    vp.secondSelectedId = null;
+    vp.overlapData = null;
+    if (vp === activeViewport) {
+        document.getElementById('panel-overlap').innerHTML = '';
+    }
+}
+
+// ======================== EDGES ========================
+function showEdges(vp, edges) {
+    clearGroup(vp.edgeLinesGroup);
+    if (!edges || edges.length === 0) return;
+    const positions = [], colors = [];
+    for (const edge of edges) {
+        const n1 = vp.sceneGraphNodes.get(edge.obj1), n2 = vp.sceneGraphNodes.get(edge.obj2);
+        if (!n1 || !n2 || !n1.center || !n2.center) continue;
+        positions.push(n1.center[0], -n1.center[1], -n1.center[2]);
+        positions.push(n2.center[0], -n2.center[1], -n2.center[2]);
+        colors.push(0.3, 1.0, 0.3, 0.3, 1.0, 0.3);
+    }
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    vp.edgeLinesGroup.add(new THREE.LineSegments(geom, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.8 })));
+}
+
+// ======================== INFO PANEL ========================
+function showInfoPanel(vp, objId, pairId = null) {
+    const node = vp.sceneGraphNodes.get(objId);
+    const panel = document.getElementById('info-panel');
+    if (!node) { panel.classList.remove('visible'); return; }
+
+    document.getElementById('panel-category').textContent = node.category || 'Unknown';
+    document.getElementById('panel-id').textContent = `ID: ${node.idx}`;
+
+    const vpBadge = document.getElementById('panel-vp');
+    if (viewports.length > 1) {
+        vpBadge.textContent = vp.expLabel;
+        vpBadge.style.display = 'inline-block';
+    } else {
+        vpBadge.style.display = 'none';
+    }
+
+    const cropImg = document.getElementById('panel-crop');
+    cropImg.src = `/api/crops/${objId}.jpg?exp=${encodeURIComponent(vp.expPath)}`;
+    cropImg.onerror = () => { cropImg.style.display = 'none'; };
+    cropImg.onload = () => { cropImg.style.display = ''; };
+    document.getElementById('panel-desc').textContent = node.description || '';
+
+    const c = node.center || [0,0,0];
+    const bmin = node.bbox ? node.bbox[0] : [null,null,null];
+    const bmax = node.bbox ? node.bbox[1] : [null,null,null];
+    const pts = vp.originalColors.has(objId) ? vp.originalColors.get(objId).length / 3 : 0;
+    const fmt = v => v != null ? v.toFixed(3) : '-';
+    document.getElementById('panel-details').innerHTML = `
+        <div class="detail-row"><span class="label">BBox</span><span class="value">(${fmt(bmin[0])}, ${fmt(bmin[1])}, ${fmt(bmin[2])}) ~ (${fmt(bmax[0])}, ${fmt(bmax[1])}, ${fmt(bmax[2])})</span></div>
+        <div class="detail-row"><span class="label">Center</span><span class="value">(${fmt(c[0])}, ${fmt(c[1])}, ${fmt(c[2])})</span></div>
+        <div class="detail-row"><span class="label">Points</span><span class="value">${pts.toLocaleString()}</span></div>
+    `;
+
+    const overlapDiv = document.getElementById('panel-overlap');
+    if (pairId && vp.overlapData) {
+        const node2 = vp.sceneGraphNodes.get(pairId);
+        overlapDiv.innerHTML = `
+            <div class="overlap-info">
+                <strong>Overlap: ${node.category} (#${objId}) ↔ ${node2?.category || '?'} (#${pairId})</strong><br>
+                Obj #${objId}: <span class="overlap-val">${(vp.overlapData.overlap_ratio_1*100).toFixed(1)}%</span> (${vp.overlapData.overlap_count_1}/${vp.overlapData.total_1})<br>
+                Obj #${pairId}: <span class="overlap-val">${(vp.overlapData.overlap_ratio_2*100).toFixed(1)}%</span> (${vp.overlapData.overlap_count_2}/${vp.overlapData.total_2})
+            </div>`;
+    } else {
+        overlapDiv.innerHTML = '';
+    }
+
+    const relDiv = document.getElementById('panel-relations');
+    relDiv.innerHTML = '';
+    const edges = vp.allSelectionEdges;
+    if (edges.length === 0) {
+        relDiv.innerHTML = '<div style="color:#666;font-size:13px;padding:8px;">No relationships.</div>';
+    } else {
+        for (const edge of edges) {
+            const otherId = edge.obj1 === objId ? edge.obj2 : edge.obj1;
+            const otherNode = vp.sceneGraphNodes.get(otherId);
+            const div = document.createElement('div');
+            div.className = 'relation-item';
+            if (vp.activePairId === otherId) div.style.background = 'rgba(233,69,96,0.3)';
+            div.innerHTML = `
+                <span class="rel-target">${otherNode?.category || 'Obj'} (#${otherId})</span>
+                <span class="rel-type"> ${edge.pretential_relation || ''}</span>
+                <div class="rel-loc">${edge.location_relation || ''}</div>
+            `;
+            div.addEventListener('click', () => selectObjectByRelation(vp, objId, otherId));
+            relDiv.appendChild(div);
+        }
+    }
+    panel.classList.add('visible');
+}
+
+// ======================== EDGE TOOLTIP ========================
+const tooltip = document.getElementById('tooltip');
+function updateEdgeTooltip(vp, e) {
+    if (vp.currentHighlightEdges.length === 0 || vp.edgeLinesGroup.children.length === 0) {
+        tooltip.classList.remove('visible'); return;
+    }
+    const rect = renderer.domElement.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width;
+    const ny = (e.clientY - rect.top) / rect.height;
+    const l = getViewportLayouts(viewports.length)[vp.index];
+    const localNx = ((nx - l.x) / l.w) * 2 - 1;
+    const localNy = -(((ny - (1 - l.y - l.h)) / l.h) * 2 - 1);
+    raycaster.setFromCamera(new THREE.Vector2(localNx, localNy), camera);
+    raycaster.params.Line = { threshold: 0.15 };
+    const hits = raycaster.intersectObjects(vp.edgeLinesGroup.children, false);
+    if (hits.length > 0) {
+        const idx = Math.floor(hits[0].index / 2);
+        if (idx >= 0 && idx < vp.currentHighlightEdges.length) {
+            const edge = vp.currentHighlightEdges[idx];
+            document.getElementById('tt-relation').textContent = edge.pretential_relation || '';
+            document.getElementById('tt-location').textContent = edge.location_relation || '';
+            tooltip.style.left = (e.clientX+15)+'px'; tooltip.style.top = (e.clientY+15)+'px';
+            tooltip.classList.add('visible');
+            return;
+        }
+    }
+    tooltip.classList.remove('visible');
+}
+
+// ======================== LEGEND ========================
+function updateLegend(vp) {
+    const legend = document.getElementById('legend');
+    if (colorMode !== 'solid' || !vp) { legend.classList.remove('visible'); return; }
+    legend.classList.add('visible');
+    let visibleIds;
+    if (vp.selectedObjId) {
+        visibleIds = [vp.selectedObjId];
+        for (const edge of vp.currentHighlightEdges) {
+            visibleIds.push(edge.obj1); visibleIds.push(edge.obj2);
+        }
+        visibleIds = [...new Set(visibleIds)];
+    } else {
+        visibleIds = [...vp.objectsMeshMap.keys()];
+    }
+    if (visibleIds.length > 30) visibleIds = visibleIds.slice(0, 30);
+    legend.innerHTML = '';
+    for (const id of visibleIds) {
+        const c = vp.objectSolidColors.get(id);
+        const n = vp.sceneGraphNodes.get(id);
+        if (!c || !n) continue;
+        const div = document.createElement('div');
+        div.className = 'legend-item';
+        div.innerHTML = `<div class="legend-swatch" style="background:rgb(${c.r*255|0},${c.g*255|0},${c.b*255|0})"></div>${n.category} (#${id})`;
+        legend.appendChild(div);
+    }
+}
+
+// ======================== VIEWPORT LABELS ========================
+function updateViewportLabels() {
+    const container = document.getElementById('viewport-labels');
+    container.innerHTML = '';
+    if (viewports.length <= 1) return;
+
+    const W = window.innerWidth, H = window.innerHeight;
+    const layouts = getViewportLayouts(viewports.length);
+
+    for (let i = 0; i < viewports.length; i++) {
+        const l = layouts[i];
+        const label = document.createElement('div');
+        label.className = 'vp-label';
+        label.textContent = viewports[i].expLabel;
+        label.style.left = (l.x * W) + 'px';
+        label.style.width = (l.w * W) + 'px';
+        container.appendChild(label);
+    }
+
+    const xBounds = new Set(), yBounds = new Set();
+    for (const l of layouts) {
+        if (l.x > 0) xBounds.add(l.x);
+        if (l.y > 0) yBounds.add(l.y);
+    }
+    for (const x of xBounds) {
+        const line = document.createElement('div');
+        line.className = 'vp-border-v';
+        line.style.left = (x * W - 1) + 'px';
+        container.appendChild(line);
+    }
+    for (const y of yBounds) {
+        const line = document.createElement('div');
+        line.className = 'vp-border-h';
+        line.style.top = (y * H - 1) + 'px';
+        container.appendChild(line);
+    }
+}
+
+// ======================== CLEANUP ========================
+function clearAllViewports() {
+    for (const vp of viewports) {
+        clearGroup(vp.pointCloudGroup);
+        clearGroup(vp.edgeLinesGroup);
+        clearGroup(vp.centerMarkersGroup);
+        clearGroup(vp.bboxGroup);
+    }
+    viewports = [];
+    activeViewport = null;
+    document.getElementById('info-panel').classList.remove('visible');
+    document.getElementById('viewport-labels').innerHTML = '';
+}
+
+// ======================== ANIMATION ========================
+function animate() {
+    requestAnimationFrame(animate);
+    const delta = Math.min(clock.getDelta(), 0.1);
+    updateReset(delta);
+    if (!isResetting) updateMovement(delta);
+    updateCameraRotation(delta);
+
+    const W = window.innerWidth, H = window.innerHeight;
+    const layouts = getViewportLayouts(viewports.length);
+    renderer.setScissorTest(true);
+    for (let i = 0; i < viewports.length; i++) {
+        const l = layouts[i];
+        const px = Math.floor(l.x * W), py = Math.floor(l.y * H);
+        const pw = Math.floor(l.w * W), ph = Math.floor(l.h * H);
+        camera.aspect = pw / ph;
+        camera.updateProjectionMatrix();
+        renderer.setViewport(px, py, pw, ph);
+        renderer.setScissor(px, py, pw, ph);
+        renderer.render(viewports[i].scene, camera);
+    }
+    renderer.setScissorTest(false);
+}
+
+// ======================== INIT ========================
+let _threeInitialized = false, _animating = false;
+
+async function startComparison(expPaths) {
+    selectorOverlay.style.display = 'none';
+    document.getElementById('loading-overlay').classList.add('active');
+    document.getElementById('error-text').textContent = '';
+    document.getElementById('toolbar').style.display = 'flex';
+
+    if (!_threeInitialized) {
+        initThree();
+        setupControls();
+        _threeInitialized = true;
+    } else {
+        clearAllViewports();
+    }
+
+    // Create viewports
+    for (let i = 0; i < expPaths.length; i++) {
+        const vp = new Viewport(i);
+        vp.expPath = expPaths[i];
+        vp.expLabel = expPaths[i].split('/').pop();
+        viewports.push(vp);
+    }
+
+    // Reset camera
+    camera.position.set(0, 0, 0);
+    currentEuler.set(0, 0, 0, 'YXZ');
+    targetEuler.set(0, 0, 0, 'YXZ');
+    camera.quaternion.setFromEuler(currentEuler);
+    camera.fov = DEFAULT_FOV;
+    camera.updateProjectionMatrix();
+    velocity.set(0, 0, 0);
+    isResetting = false;
+
+    // Count total objects for progress
+    const loadingText = document.getElementById('loading-text');
+    const loadingBar = document.getElementById('loading-bar');
+    const errorText = document.getElementById('error-text');
+    let totalObjects = 0;
+    loadingText.textContent = 'Checking...';
+    loadingBar.style.width = '2%';
+
+    for (const vp of viewports) {
+        try {
+            const r = await fetch(`/api/check?exp=${encodeURIComponent(vp.expPath)}`);
+            const d = await r.json();
+            if (!d.ok) { errorText.textContent = `${vp.expLabel}: ${d.error}`; loadingBar.style.width = '0%'; return; }
+            totalObjects += d.object_count;
+        } catch (e) { errorText.textContent = `${vp.expLabel}: ${e.message}`; loadingBar.style.width = '0%'; return; }
+    }
+
+    // Load all viewports in parallel
+    let totalLoaded = 0;
+    const promises = viewports.map(vp =>
+        loadViewportData(vp, () => {
+            totalLoaded++;
+            loadingText.textContent = `Loading: ${totalLoaded}/${totalObjects}`;
+            loadingBar.style.width = `${5 + 90 * (totalLoaded / totalObjects)}%`;
+        })
+    );
+    const results = await Promise.all(promises);
+
+    for (let i = 0; i < results.length; i++) {
+        if (!results[i].ok) {
+            errorText.textContent = `${viewports[i].expLabel}: ${results[i].error}`;
+            loadingBar.style.width = '0%';
+            return;
+        }
+    }
+
+    loadingBar.style.width = '100%';
+    loadingText.textContent = 'Done!';
+    document.getElementById('loading-overlay').classList.remove('active');
+
+    activeViewport = viewports[0];
+    for (const vp of viewports) refreshMarkers(vp);
+    updateViewportLabels();
+
+    if (!_animating) { _animating = true; animate(); }
+}
+
+// ======================== BOOTSTRAP ========================
+loadExperiments().then(() => {
+    document.getElementById('btn-load').addEventListener('click', () => {
+        const paths = [..._selectedExps];
+        if (paths.length === 1) startComparison(paths);
+    });
+    document.getElementById('btn-compare').addEventListener('click', () => {
+        const paths = [..._selectedExps];
+        if (paths.length >= 2 && paths.length <= 4) startComparison(paths);
+    });
+});
+</script>
+</body>
+</html>

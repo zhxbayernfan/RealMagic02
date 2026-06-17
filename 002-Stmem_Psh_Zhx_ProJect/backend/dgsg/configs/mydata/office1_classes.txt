@@ -1,0 +1,36 @@
+chair
+office chair
+table
+tv
+potted plant
+flower
+basket
+clothes
+cabinet
+box
+book
+remote control
+cup
+water bottle
+pen
+computer tower
+cart
+case of water bottles
+desk
+fan
+keyboard
+mouse
+laptop
+plant
+bag
+umbrella
+storage bin
+bottle
+tissue pack
+marker
+red marker
+pencil
+film roll
+thermos
+power strip
+scissors
