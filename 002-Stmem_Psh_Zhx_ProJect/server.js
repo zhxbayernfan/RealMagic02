@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 
-const PORT = 8080;
+const PORT = 8099;
 const BATCH_HOST = '127.0.0.1';
 const BATCH_PORT = 8000;
 // 远端 FastGS host（origin/psh batch_service）：跑 3DGS 训练
