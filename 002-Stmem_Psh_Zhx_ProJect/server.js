@@ -2,9 +2,78 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 
-const PORT = 8099;
+// ── 记忆聚合层（SQLite + batch 数据） ──
+let _memdb = null;
+function memdb() {
+  if (_memdb) return _memdb;
+  const dbPath = path.join(DATA_DIR, 'memory.sqlite');
+  if (fs.existsSync(dbPath)) {
+    try { _memdb = require('better-sqlite3')(dbPath); } catch (_) {}
+  }
+  return _memdb;
+}
+
+function scanBatchDirs() {
+  // 返回所有包含真实帧文件的 batch 目录路径
+  const dirs = [];
+  if (!fs.existsSync(DATA_DIR)) return dirs;
+  for (const d of fs.readdirSync(DATA_DIR)) {
+    const dp = path.join(DATA_DIR, d);
+    // 跳过符号链接（如 latest -> jszn）
+    if (fs.lstatSync(dp).isSymbolicLink()) continue;
+    const st = fs.statSync(dp);
+    if (!st.isDirectory()) continue;
+    // 统计 frames 数量（只有实际帧文件才算）
+    const framesDir = path.join(dp, 'frames');
+    let frameCount = 0;
+    if (fs.existsSync(framesDir)) {
+      try { frameCount = fs.readdirSync(framesDir).filter(f => f.match(/\.(jpg|jpeg|png)$/i)).length; } catch (_) {}
+    }
+    if (frameCount > 0) dirs.push(dp);
+  }
+  return dirs;
+}
+
+function readJsonSafe(fp) {
+  try { return JSON.parse(fs.readFileSync(fp, 'utf8')); } catch (_) { return null; }
+}
+
+function aggregateBatchStats() {
+  let totalFrames = 0, processedFrames = 0, totalPoints = 0, batchCount = 0;
+  for (const d of scanBatchDirs()) {
+    const s = readJsonSafe(path.join(d, 'status.json'));
+    if (s) {
+      batchCount++;
+      totalFrames += s.total_frames || 0;
+      processedFrames += s.processed_frames || 0;
+      totalPoints += s.total_points || 0;
+    }
+  }
+  // 也统计记忆 DB
+  const db = memdb();
+  let memoryCount = 0, faceCount = 0, archivedCount = 0;
+  if (db) {
+    try {
+      memoryCount = db.prepare('SELECT COUNT(*) as c FROM memories').get().c;
+      faceCount = db.prepare('SELECT COUNT(*) as c FROM faces').get().c;
+      archivedCount = db.prepare('SELECT COUNT(*) as c FROM archived_memories').get().c;
+    } catch (_) {}
+  }
+  return { totalFrames, processedFrames, totalPoints, batchCount, memoryCount, faceCount, archivedCount };
+}
+
+function gsList() {
+  const gsDir = path.join(DATA_DIR, 'gaussian-splats');
+  if (!fs.existsSync(gsDir)) return [];
+  return fs.readdirSync(gsDir).filter(f => f.endsWith('.ply')).map(f => ({
+    name: f, url: '/api/gaussian-splats/' + f,
+    size: fs.statSync(path.join(gsDir, f)).size,
+  }));
+}
+
+const PORT = 8080;
 const BATCH_HOST = '127.0.0.1';
 const BATCH_PORT = 8000;
 // 远端 FastGS host（origin/psh batch_service）：跑 3DGS 训练
@@ -199,7 +268,11 @@ function handleRequest(req, res) {
   if (p === '/api/gaussian-splats/demo') {
     const demoPath = path.join(DATA_DIR, 'gaussian-splats', 'lingbot.ply');
     if (fs.existsSync(demoPath)) {
-      res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+      const stat = fs.statSync(demoPath);
+      res.writeHead(200, {
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': stat.size,
+      });
       return fs.createReadStream(demoPath).pipe(res);
     }
     return json(res, 404, { error: 'Demo not found' });
@@ -212,10 +285,233 @@ function handleRequest(req, res) {
       return json(res, 404, { error: 'Not found' });
     const fp = path.join(DATA_DIR, 'gaussian-splats', fname);
     if (fs.existsSync(fp)) {
-      res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+      const stat = fs.statSync(fp);
+      res.writeHead(200, {
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': stat.size,
+      });
       return fs.createReadStream(fp).pipe(res);
     }
     return json(res, 404, { error: 'Not found' });
+  }
+
+  // ========== 记忆聚合 API (New_Stmem.html 数据源) ==========
+
+  // ── GET /api/memory/summary ── 概览页统计
+  if (p === '/api/memory/summary') {
+    const s = aggregateBatchStats();
+    const gs = gsList();
+    return json(res, 200, {
+      totalDuration: { hours: (s.processedFrames / 3600).toFixed(1), delta: null },
+      keyframeCount:  { count: s.processedFrames, annotated: s.memoryCount, delta: s.memoryCount > 0 ? `VLM 已标注 ${Math.round(s.memoryCount / Math.max(1, s.processedFrames) * 100)}%` : null },
+      spaceCount:     { count: s.batchCount, delta: s.batchCount > 0 ? `+${s.batchCount} 个空间` : null },
+      eventCount:     { count: s.memoryCount + s.archivedCount, delta: null },
+      pointsTotal:    { count: s.totalPoints, unit: '点' },
+      facesCount:     s.faceCount,
+      gaussianSplats: gs.length,
+    });
+  }
+
+  // ── GET /api/memory/search?q=xxx ── 自然语言检索记忆
+  if (p === '/api/memory/search') {
+    const q = getQuery(req).q || '';
+    const db = memdb();
+    const cards = [];
+    if (db && q) {
+      try {
+        const rows = db.prepare(
+          "SELECT frame_path, description, capture_time, model FROM memories WHERE description LIKE ? OR frame_path LIKE ? LIMIT 20"
+        ).all('%' + q + '%', '%' + q + '%');
+        for (const r of rows) {
+          cards.push({
+            place: r.frame_path || '',
+            time: r.capture_time || '',
+            dur: '',
+            match: '--',
+            desc: r.description || '',
+            bg: 'linear-gradient(135deg,#5B6B52,#33402c)',
+          });
+        }
+      } catch (_) {}
+    }
+    // Fallback: 返回 batch 目录场景数据
+    if (!cards.length) {
+      for (const d of scanBatchDirs()) {
+        const sg = readJsonSafe(path.join(d, 'scene_graph.json'));
+        if (sg && sg.nodes) {
+          for (const n of sg.nodes) {
+            if (q && n.description && n.description.includes(q))
+              cards.push({
+                place: n.category || n.name || d,
+                time: '',
+                dur: '',
+                match: '--',
+                desc: n.description || '',
+                bg: 'linear-gradient(135deg,#7E8FC4,#9A6FB0)',
+              });
+          }
+        }
+      }
+    }
+    const html = cards.length
+      ? `已检索到 <b>${cards.length} 段</b> 与「<b>${q}</b>」相关的记忆`
+      : `暂未找到与「<b>${q}</b>」相关的记忆`;
+    return json(res, 200, { html, cards: cards.slice(0, 10), query: q });
+  }
+
+  // ── GET /api/memory/anchors?batch_id=xxx ── 3D 漫游锚点
+  if (p === '/api/memory/anchors') {
+    const batchId = getQuery(req).batch_id;
+    const anchors = [];
+    const dirs = batchId
+      ? [path.join(DATA_DIR, batchId)]
+      : scanBatchDirs();
+    for (const d of dirs) {
+      if (!fs.existsSync(d)) continue;
+      // DGSG objects 作为锚点
+      const dobj = readJsonSafe(path.join(d, 'dgsg_objects.json'));
+      if (dobj && dobj.objects) {
+        for (const o of dobj.objects) {
+          anchors.push({
+            name: o.class_name || ('object_' + o.idx),
+            time: '',
+            dur: '',
+            frames: 0,
+            mood: '',
+            moodColor: '#5E7A18',
+            caption: o.description || '',
+            tags: [o.class_name || ''],
+            pos: o.center_3d || [0, 1, 0],
+          });
+        }
+      }
+      // Fallback: scene_graph nodes
+      if (!anchors.length) {
+        const sg = readJsonSafe(path.join(d, 'scene_graph.json'));
+        if (sg && sg.nodes) {
+          for (const n of sg.nodes) {
+            anchors.push({
+              name: n.category || n.name || ('node_' + n.idx),
+              time: '',
+              dur: '',
+              frames: 0,
+              mood: '',
+              moodColor: '#C7700E',
+              caption: n.description || '',
+              tags: [n.category || ''],
+              pos: n.center_3d || n.position || [0, 1, 0],
+            });
+          }
+        }
+      }
+    }
+    return json(res, 200, { anchors, count: anchors.length });
+  }
+
+  // ── GET /api/memory/clips?type=event|place|person|time ── 分类片段
+  if (p === '/api/memory/clips') {
+    const type = getQuery(req).type || 'event';
+    const db = memdb();
+    const items = [];
+    if (db) {
+      try {
+        // 按 frame_path 中的地点/场景分组
+        const rows = db.prepare(
+          "SELECT frame_path, description, capture_time FROM memories ORDER BY capture_time DESC LIMIT 200"
+        ).all();
+        const groups = {};
+        for (const r of rows) {
+          const key = r.frame_path || 'unknown';
+          if (!groups[key]) groups[key] = { place: key, count: 0, duration: 0, desc: r.description, time: r.capture_time };
+          groups[key].count++;
+        }
+        for (const k of Object.keys(groups)) {
+          const g = groups[k];
+          items.push({
+            place: g.place,
+            time: g.time || '',
+            count: g.count,
+            duration: '--',
+            desc: g.desc || '',
+            bg: 'linear-gradient(135deg,#A8C887,#6FA15E)',
+            tags: [type],
+          });
+        }
+      } catch (_) {}
+    }
+    return json(res, 200, { type, items: items.slice(0, 30), count: items.length });
+  }
+
+  // ── GET /api/memory/report ── 回忆报告
+  if (p === '/api/memory/report') {
+    const s = aggregateBatchStats();
+    const db = memdb();
+    let topPlaces = [], people = [], keywords = [], moodBars = [];
+    if (db) {
+      try {
+        // 地点聚合
+        const placeRows = db.prepare(
+          "SELECT frame_path, COUNT(*) as cnt FROM memories GROUP BY frame_path ORDER BY cnt DESC LIMIT 8"
+        ).all();
+        const maxCnt = placeRows.length ? placeRows[0].cnt : 1;
+        const pal = ['#7E8FC4', '#6FA15E', '#F2A03D', '#3E9B96', '#FFB07C', '#F97C6E', '#D4708A', '#5B6B52'];
+        topPlaces = placeRows.map((r, i) => ({
+          name: r.frame_path || '--',
+          count: r.cnt + ' 段',
+          bar: `width:${Math.round(r.cnt / maxCnt * 100)}%; background:${pal[i % pal.length]}; border-radius:999px;`,
+        }));
+        // 人物
+        const faceRows = db.prepare("SELECT name, count FROM faces ORDER BY count DESC LIMIT 4").all();
+        const faceBgs = [
+          'linear-gradient(135deg,#FFD27A,#F2A03D)',
+          'linear-gradient(135deg,#7E8FC4,#9A6FB0)',
+          'linear-gradient(135deg,#F0A6B6,#D4708A)',
+          'linear-gradient(135deg,#FFB07C,#F97C6E)',
+        ];
+        people = faceRows.map((r, i) => ({
+          initial: (r.name || '-')[0],
+          name: r.name || '--',
+          sub: '',
+          count: r.count + ' 次',
+          bg: faceBgs[i % faceBgs.length],
+        }));
+        // 关键词（按描述中常见词，简化版）
+        const kwRows = db.prepare("SELECT description FROM memories WHERE description != '' LIMIT 200").all();
+        const wordFreq = {};
+        for (const r of kwRows) {
+          (r.description || '').replace(/[，。、；：,.\\s]+/g, ' ').split(' ').filter(w => w.length >= 2).forEach(w => {
+            wordFreq[w] = (wordFreq[w] || 0) + 1;
+          });
+        }
+        keywords = Object.entries(wordFreq).sort((a, b) => b[1] - a[1]).slice(0, 15).map(([t, n]) => ({
+          text: t, style: `font-size:${Math.min(24, 12 + n * 2)}px; color:#33312b; border-radius:999px; padding:4px 12px;`,
+        }));
+        // 心情条（简化：每天一段随机色）
+        moodBars = Array.from({ length: 30 }, (_, i) => {
+          const colors = ['#6FA15E', '#F2A03D', '#7E8FC4', '#FFB07C', '#D4708A'];
+          const c = colors[i % colors.length];
+          const h = 0.3 + Math.random() * 0.7;
+          return { style: `flex:1; height:${Math.round(h * 100)}%; background:${c}; border-radius:5px 5px 2px 2px;` };
+        });
+      } catch (_) {}
+    }
+    return json(res, 200, {
+      stats: [
+        { value: String(s.batchCount || '--'), label: '重建空间', color: '#1c1d19' },
+        { value: (s.processedFrames > 0 ? (s.processedFrames / 3600).toFixed(1) + 'h' : '--'), label: '记忆总时长', color: '#1c1d19' },
+        { value: s.batchCount > 0 ? '+' + s.batchCount : '--', label: '新重建空间', color: '#5E7A18' },
+        { value: String(s.memoryCount || '--'), label: 'VLM 标注数', color: '#C7700E' },
+      ],
+      moodBars,
+      keywords: keywords.length ? keywords : [{ text: '等待数据...', style: 'font-size:16px; color:#8A8578;' }],
+      topPlaces: topPlaces.length ? topPlaces : [{ name: '等待数据...', count: '--', bar: 'width:0%' }],
+      people: people.length ? people : [{ initial: '-', name: '等待数据...', sub: '', count: '--', bg: 'linear-gradient(135deg,#ccc,#aaa)' }],
+      // 时间线 days
+      days: Array.from({ length: 31 }, (_, i) => {
+        const colors = ['#6FA15E', '#F2A03D', '#7E8FC4', '#FFB07C', '#D4708A'];
+        return { dot: colors[i % colors.length], label: (i + 1) + '日', value: '--' };
+      }),
+    });
   }
 
   serveStatic(req, res);
