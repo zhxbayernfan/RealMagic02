@@ -250,6 +250,18 @@
       const frames = await loadFrames();
       const reversed = frames.slice().reverse();
 
+      // 更新概览统计
+      document.getElementById('statPhotos').textContent = frames.length;
+      var labeledCount = frames.filter(f => f.description && f.description !== '无结果').length;
+      document.getElementById('statLabeled').textContent = labeledCount;
+      if (frames.length > 0) {
+        var last = reversed[0];
+        var d = new Date(last.time);
+        document.getElementById('statLatest').textContent = [d.getMonth()+1,d.getDate()].map(x=>String(x).padStart(2,'0')).join('/') + ' ' + [d.getHours(),d.getMinutes()].map(x=>String(x).padStart(2,'0')).join(':');
+        var totalMB = Math.round(frames.reduce((s,f) => s + (f.base64 ? f.base64.length * 0.75 / 1024 / 1024 : 0.5), 0));
+        document.getElementById('statStorage').textContent = totalMB + 'MB';
+      }
+
       // 概览
       const overviewEl = document.getElementById('overviewFrames');
       overviewEl.innerHTML = '';
