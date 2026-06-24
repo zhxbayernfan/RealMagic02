@@ -51,6 +51,10 @@
     .frame-card img { width: 100%; height: 120px; object-fit: cover; }
     .frame-card .desc { padding: 8px; font-size: 11px; color: #555; line-height: 1.4; max-height: 55px; overflow: hidden; }
     .frame-card .time { padding: 0 8px 8px; font-size: 10px; color: #888; }
+    #lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1000; align-items:center; justify-content:center; }
+    #lightbox.show { display:flex; }
+    #lightbox img { max-width:90%; max-height:85%; border-radius:8px; }
+    #lightbox .lb-close { position:absolute; top:20px; right:30px; color:#fff; font-size:36px; cursor:pointer; }
     .overview-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .stat-card { background: rgba(255,255,255,0.6); border-radius: 8px; padding: 20px; text-align: center; }
     .stat-card .num { font-size: 32px; color: #111; font-weight: 700; }
@@ -177,7 +181,8 @@
       card.className = 'frame-card';
       const desc = fr.description || '';
       card.innerHTML = '<img src="data:image/jpeg;base64,' + fr.base64 + '"><div class="desc">' + desc.slice(0, 80) + (desc.length > 80 ? '...' : '') + '</div><div class="time">' + (fr.time ? new Date(fr.time).toLocaleString('zh-CN') : '') + '</div>';
-      card.addEventListener('click', () => { showResult(desc, fr.model, fr.elapsed, fr.time); });
+      card.addEventListener('click', () => { var lb=document.getElementById('lightbox'); document.getElementById('lbImg').src='data:image/jpeg;base64,'+fr.base64; lb.classList.add('show'); });
+      document.getElementById('lightbox').addEventListener('click', function(e){ if(e.target===this||e.target.className==='lb-close') this.classList.remove('show'); });
       return card;
     }
 
@@ -279,5 +284,6 @@
 
     refreshAll();
   </script>
+  <div id="lightbox"><span class="lb-close">&times;</span><img id="lbImg" src=""></div>
 </body>
 </html>
