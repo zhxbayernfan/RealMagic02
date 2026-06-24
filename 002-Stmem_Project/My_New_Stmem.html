@@ -225,7 +225,7 @@
 
     async function refreshAll() {
       const frames = await loadFrames();
-      const reversed = frames.slice().reverse();
+      // API already returns newest first
 
       // 更新概览统计(异步不阻塞)
       getStats().then(function(s){
@@ -242,13 +242,13 @@
       // 概览
       const overviewEl = document.getElementById('overviewFrames');
       overviewEl.innerHTML = '';
-      reversed.slice(0, 15).forEach(fr => overviewEl.appendChild(createCard(fr)));
+      frames.slice(0, 15).forEach(fr => overviewEl.appendChild(createCard(fr)));
 
       // 记忆回溯
       document.getElementById('frameCount').textContent = frames.length;
       const recallEl = document.getElementById('recallFrames');
       recallEl.innerHTML = '';
-      reversed.forEach(fr => recallEl.appendChild(createCard(fr)));
+      frames.forEach(fr => recallEl.appendChild(createCard(fr)));
     }
 
     setupUpload('uploadBox2', 'fileInput2', 'preview2', 'previewImg2', 'status2', 'result2', 'resultText2', 'resultMeta2');
