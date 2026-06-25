@@ -484,14 +484,24 @@ function handleRequest(req, res) {
           { bgSoft: 'rgba(240,166,182,0.12)', tag: { color: '#8A3A55', bg: '#FBE8EE' } },
         ];
         let pi = 0;
-        for (const r of rows) {
-          const key = clsZh((r.frame_path || 'unknown').replace(/^.*?\//, ''));
-          const cropId = r.crop_id || 0;
-          if (!groups[key]) groups[key] = { place: key, count: 0, desc: r.description, time: r.capture_time, cropId: cropId };
-          groups[key].count++;
-        }
-        const sortedKeys = Object.keys(groups).sort((a, b) => { if (groups[b].count !== groups[a].count) return groups[b].count - groups[a].count; return (groups[b].time || '').localeCompare(groups[a].time || ''); });
-        for (const k of sortedKeys) {
+if (type === 'time') {
+          for (let ri=0; ri<rows.length; ri++) {
+            const r=rows[ri], p=palettes[ri%palettes.length];
+            const place=clsZh((r.frame_path||'unknown').replace(/^.*?\//, ''));
+            items.push({place:place, time:r.capture_time||'', count:1, duration:'--', desc:r.description||'',
+              bg:'url(/crops/'+(r.crop_id||ri)+'.jpg) center/cover', bgSoft:p.bgSoft, badge:'', title:place,
+              sub: (function(ts){ try { var s=String(ts); var t=s.slice(0,10)+'T'+s.slice(11,19)+'Z'; var d=new Date(t); if(!isNaN(d.getTime())) return (d.getMonth()+1)+'月'+d.getDate()+'日 '; } catch(_) {} return ''; })(r.capture_time) + (r.description||'').slice(0,50), initial:place[0]||'?',
+              isRect:true, isRound:false, tags:[Object.assign({label:place},p.tag)]});
+          }
+        } else {
+          for (const r of rows) {
+            const key = clsZh((r.frame_path || 'unknown').replace(/^.*?\//, ''));
+            const cropId = r.crop_id || 0;
+            if (!groups[key]) groups[key] = { place: key, count: 0, desc: r.description, time: r.capture_time, cropId: cropId };
+            groups[key].count++;
+          }
+          const sortedKeys = Object.keys(groups).sort((a, b) => { if (groups[b].count !== groups[a].count) return groups[b].count - groups[a].count; return (groups[b].time || '').localeCompare(groups[a].time || ''); });
+          for (const k of sortedKeys) {
           const g = groups[k];
           const p = palettes[pi % palettes.length];
           items.push({
@@ -511,6 +521,7 @@ function handleRequest(req, res) {
             tags: [Object.assign({ label: g.place }, p.tag)],
           });
           pi++;
+        }
         }
       } catch (_) {}
     }
