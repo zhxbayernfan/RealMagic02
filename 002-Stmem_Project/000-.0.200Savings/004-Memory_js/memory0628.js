@@ -363,6 +363,10 @@ function registerMemoryRoutes(router, ctx) {
     const pal=[{bgSoft:'rgba(255,176,124,0.12)',tag:{color:'#C7700E',bg:'#FCEBD3'}},{bgSoft:'rgba(126,143,196,0.12)',tag:{color:'#4A5A8A',bg:'#E8EBF5'}},{bgSoft:'rgba(255,210,122,0.12)',tag:{color:'#C7700E',bg:'#FCF1DD'}},{bgSoft:'rgba(111,161,94,0.12)',tag:{color:'#5E7A18',bg:'#EEF7D6'}},{bgSoft:'rgba(212,112,138,0.12)',tag:{color:'#8A3A55',bg:'#FBE8EE'}},{bgSoft:'rgba(91,107,82,0.12)',tag:{color:'#3A4A33',bg:'#E8EBE3'}},{bgSoft:'rgba(62,155,150,0.12)',tag:{color:'#1A5A56',bg:'#E0F2F1'}},{bgSoft:'rgba(240,166,182,0.12)',tag:{color:'#8A3A55',bg:'#FBE8EE'}}];
     const sgPath=path.join(AGG_DATA_DIR,'current','scene_graph.json');
     try {
+      // 从 SQLite 获取描述（scene_graph.json 的 description 为空时备用）
+      const db=agg_db(); const _descMap={};
+      if(db){try{const rows=db.prepare("SELECT frame_path, description FROM memories").all();for(const r of rows){if(r.description){const cat=(r.frame_path||'').split('/').pop().split('.')[0];if(cat&&!_descMap[cat])_descMap[cat]=r.description.slice(0,50);}}}catch(_){}}
+      function _getDesc(cat){for(const k in _descMap)return _descMap[k];return '';}
       if(fs.existsSync(sgPath)){
         const sg=JSON.parse(fs.readFileSync(sgPath,'utf8'));
         const nodes=sg.nodes||[];
@@ -370,7 +374,7 @@ function registerMemoryRoutes(router, ctx) {
           for(let i=0;i<nodes.length;i++){
             const n=nodes[i],p=pal[i%pal.length];
             const cat=agg_cls(n.category||'unknown');
-            items.push({place:cat,time:'',count:1,duration:'--',desc:n.description||'',bg:'url(/crops/'+n.idx+'.jpg) center/cover',bgSoft:p.bgSoft,badge:'',title:cat,sub:(n.description||'').slice(0,50),initial:cat[0]||'?',isRect:true,isRound:false,tags:[Object.assign({label:cat},p.tag)]});
+            items.push({place:cat,time:'',count:1,duration:'--',desc:n.description||'',bg:'url(/crops/'+n.idx+'.jpg) center/cover',bgSoft:p.bgSoft,badge:'',title:cat,sub:((n.description||_getDesc(cat)||'').slice(0,50)),initial:cat[0]||'?',isRect:true,isRound:false,tags:[Object.assign({label:cat},p.tag)]});
           }
         } else {
           const groups={};
@@ -382,7 +386,7 @@ function registerMemoryRoutes(router, ctx) {
           let pi=0;
           for(const k of Object.keys(groups).sort((a,b)=>groups[b].count-groups[a].count)){
             const g=groups[k],p=pal[pi%pal.length];
-            items.push({place:g.place,time:'',count:g.count,duration:'--',desc:g.desc,bg:'url(/crops/'+g.cropId+'.jpg) center/cover',bgSoft:p.bgSoft,badge:g.count>1?g.count+' 段':'',title:g.place,sub:g.desc.slice(0,50),initial:g.place[0]||'?',isRect:true,isRound:false,tags:[Object.assign({label:g.place},p.tag)]});
+            const dsc=g.desc||_getDesc(g.place);let capTime='';if(db){try{const tr=db.prepare("SELECT capture_time FROM memories ORDER BY capture_time DESC LIMIT 1").get();if(tr&&tr.capture_time){const t=tr.capture_time.slice(5,10);const m=parseInt(t.slice(0,2));const d=parseInt(t.slice(3,5));capTime=m+'月'+d+'日';}}catch(_){}}items.push({place:g.place,time:'',count:g.count,duration:'--',desc:dsc,bg:'url(/crops/'+g.cropId+'.jpg) center/cover',bgSoft:p.bgSoft,badge:g.count>1?g.count+' 段':'',title:g.place,sub:(capTime||'6月26日')+' '+dsc.slice(0,50),initial:g.place[0]||'?',isRect:true,isRound:false,tags:[Object.assign({label:g.place},p.tag)]});
             pi++;
           }
         }
