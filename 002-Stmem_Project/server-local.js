@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3000;
+const PORT = 8100;
 const FRAMES_DIR = path.join(__dirname, '001-Data', 'frames');
 const DB_PATH = path.join(__dirname, '001-Data', 'memory.sqlite');
 
