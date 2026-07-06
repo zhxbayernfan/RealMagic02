@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的记忆</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "PingFang SC", "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #ECEAE3;
+    color: #1c1d19;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.14); border-radius: 999px; border: 3px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  .sidebar {
+    width: 248px; flex: 0 0 248px;
+    background: #151613;
+    display: flex; flex-direction: column;
+    padding: 24px 16px; gap: 6px;
+  }
+  .sb-logo {
+    display: flex; align-items: center; gap: 11px;
+    padding: 6px 8px 22px;
+  }
+  .sb-icon {
+    width: 38px; height: 38px; border-radius: 11px;
+    background: #B3FF38;
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 38px;
+  }
+  .sb-text { display: flex; flex-direction: column; line-height: 1.1; }
+  .sb-text .t1 { font-size: 17px; font-weight: 700; color: #fff; }
+  .sb-text .t2 { font-size: 10px; color: #6E6A5E; letter-spacing: 0.05em; }
+
+  .nav {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    font-size: 14px; font-weight: 500; color: #6E6A5E;
+    cursor: pointer;
+  }
+  .nav:hover { background: rgba(255,255,255,0.06); }
+  .nav.act { background: #23261d; color: #fff; }
+  .spacer { flex: 1; }
+
+  /* 用户信息 + 存储空间 */
+  .user-section {
+    padding: 12px; border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .user-info {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  }
+  .user-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #B3FF38; color: #151613;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px;
+  }
+  .user-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .storage-bar-wrap {
+    display: flex; align-items: center; gap: 8px;
+    cursor: default;
+  }
+  .storage-bar-bg {
+    flex: 1; height: 4px; background: rgba(255,255,255,0.1);
+    border-radius: 999px; overflow: hidden;
+  }
+  .storage-bar-fill {
+    height: 100%; background: #B3FF38; border-radius: 999px;
+    transition: width 0.3s;
+  }
+  .storage-text { font-size: 11px; color: #6E6A5E; white-space: nowrap; }
+
+  .main {
+    flex: 1; overflow-y: auto;
+    padding: 32px;
+    background: #ECEAE3;
+  }
+  .tab-page {}
+  .tab-card { background: #fff; border-radius: 20px; padding: 32px; max-width: 720px; margin: 0 auto; }
+
+  /* Report page */
+  .page-tag {
+    font-size: 20px; font-weight: 800; letter-spacing: 0.06em; color: #5E7A18;
+  }
+  .rep-title {
+    font-size: 40px; font-weight: 700; letter-spacing: -0.02em;
+    margin-top: 14px; line-height: 1.15;
+  }
+  .rep-sub {
+    font-size: 13px; color: #9A9486; margin-top: 14px;
+  }
+  .rep-header {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;
+  }
+  .btn-regen {
+    height: 38px; padding: 0 16px; border-radius: 999px;
+    border: 1px solid rgba(0,0,0,0.12); background: #fff;
+    color: #1c1d19; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 7px;
+    white-space: nowrap; font-family: inherit;
+  }
+  .narrative {
+    font-size: 17px; line-height: 1.9; color: #33312b;
+    margin-top: 32px;
+  }
+  .divider { height: 1px; background: rgba(0,0,0,0.07); margin: 36px 0; }
+
+  .num-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+  }
+  .num-val { font-size: 32px; font-weight: 700; letter-spacing: -0.01em; }
+  .num-lbl { font-size: 12px; color: #9A9486; margin-top: 4px; }
+
+  .sec-title {
+    font-size: 17px; font-weight: 700; margin-bottom: 18px;
+  }
+
+  .kw-cloud {
+    display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+  }
+
+  .places-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+  }
+  .place-row {
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .place-item {
+    margin-bottom: 6px;
+  }
+  .place-hdr {
+    display: flex; justify-content: space-between; margin-bottom: 6px;
+  }
+  .place-nm { font-size: 13px; font-weight: 500; color: #33312b; }
+  .place-cn { font-size: 13px; font-weight: 600; color: #1c1d19; }
+  .place-bar-bg {
+    height: 7px; background: #EFEEE8; border-radius: 999px; overflow: hidden;
+  }
+  .place-bar {
+    height: 100%; border-radius: 999px;
+  }
+
+  .people-wrap {
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .person-card {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .pa {
+    width: 34px; height: 34px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 600; color: #151613;
+  }
+  .pn { font-size: 13px; font-weight: 500; color: #33312b; }
+  .pc { font-size: 11px; color: #9A9486; margin-top: 2px; }
+
+  .footer-note {
+    font-size: 11px; color: #9A9486; line-height: 1.6;
+    margin-top: 40px; padding-top: 20px;
+    border-top: 1px solid rgba(0,0,0,0.07);
+  }
+  .loading { text-align: center; padding: 80px 0; color: #9A9486; font-size: 14px; }
+
+  @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+  .tab-page.slide-up { animation: slideUp .5s ease; }
+  .tab-page.slide-down { animation: slideDown .5s ease; }
+
+  /* 概览页头部 */
+  .ov-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 32px; }
+  .ov-title { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+  .ov-sub { font-size: 12px; color: #9A9486; margin-top: 6px; }
+  .ov-search {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px; border-radius: 999px;
+    background: #fff; border: 1px solid rgba(0,0,0,0.08);
+    width: 33%; flex-shrink: 0;
+  }
+  .ov-search input {
+    border: none; outline: none; flex: 1;
+    font-size: 13px; font-family: inherit;
+    background: transparent; color: #1c1d19;
+  }
+  .ov-search input::placeholder { color: #B0AB9E; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#151613" stroke-width="2.2"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 6h6a3 3 0 0 1 3 3v0a3 3 0 0 0 3 3"/><path d="M5 8v4a3 3 0 0 0 3 3h4"/></svg>
+    </div>
+    <div class="sb-text"><span class="t1">识境</span><span class="t2">SENTRIX</span></div>
+  </div>
+  <div class="nav act" data-tab="0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="4" y="14" width="16" height="7" rx="2"/></svg>概览</div>
+  <div class="nav" data-tab="1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>记忆检索</div>
+  <div class="nav" data-tab="2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>片段与事件</div>
+  <div class="nav" data-tab="3"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>回忆报告</div>
+  <div class="spacer"></div>
+
+  <!-- 用户信息 + 存储空间 -->
+  <div class="user-section">
+    <div class="user-info">
+      <div class="user-avatar">z</div>
+      <div class="user-name">zhx</div>
+    </div>
+    <div class="storage-bar-wrap" title="存储空间用量" id="storageWidget">
+      <div class="storage-bar-bg"><div class="storage-bar-fill" id="storageFill" style="width:0%"></div></div>
+      <div class="storage-text" id="storageText">-- / --</div>
+    </div>
+  </div>
+
+  <div class="nav" data-tab="4"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.41 1z"/></svg>设置</div>
+</aside>
+
+<main class="main" id="app">
+  <div class="tab-page" id="tab0"><div class="ov-header">
+<div><div class="page-tag">SenTrix·概览</div><div class="ov-sub" style="margin-top:6px">你的记忆，今天又长大了一点</div></div>
+<div class="ov-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0AB9E" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="问问你的记忆：家人？猫咪？海边？盛夏？" id="ovSearchInput"></div>
+</div>
+</div>
+  <div class="tab-page" id="tab1" style="display:none"><div class="ov-header"><div><div class="page-tag">SenTrix·记忆检索</div><div class="ov-sub" style="margin-top:6px">用自然语言找回任何一个瞬间</div></div><div class="ov-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0AB9E" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="问问你的记忆：家人？猫咪？海边？盛夏？" id="searchInput"></div></div><div class="tab-card"><div style="text-align:center;padding:60px 0;color:#9A9486;font-size:14px">检索内容即将上线</div></div></div>
+  <div class="tab-page" id="tab2" style="display:none"><div class="ov-header"><div><div class="page-tag">SenTrix·片段与事件</div><div class="ov-sub" style="margin-top:6px">按事件、人物或时段回看</div></div><div class="ov-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0AB9E" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="问问你的记忆：家人？猫咪？海边？盛夏？" id="clipSearchInput"></div></div><div class="tab-card"><div style="text-align:center;padding:60px 0;color:#9A9486;font-size:14px">片段内容即将上线</div></div></div>
+  <div class="tab-page" id="tab3" style="display:none"><div class="loading" style="padding:60px 0;text-align:center;color:#9A9486">加载中...</div></div>
+  <div class="tab-page" id="tab4" style="display:none"><div class="ov-header"><div><div class="page-tag">SenTrix·设置</div><div class="ov-sub" style="margin-top:6px">让识境更懂你</div></div></div><div class="tab-card"><div style="text-align:center;padding:60px 0;color:#9A9486;font-size:14px">设置页面即将上线</div></div></div>
+</main>
+
+<script>
+// ── 搜索框跳转（概览/片段/回忆报告 → 记忆检索）
+  var _searchVal = '', _prevTab = 0;
+  function syncSearch(){var ids=['ovSearchInput','searchInput','clipSearchInput','reportSearchInput'];ids.forEach(function(id){var el=document.getElementById(id);if(el)el.value=_searchVal;});}
+  function jumpSearch(inputId){var inp=document.getElementById(inputId);if(!inp)return;_searchVal=inp.value;var si=document.getElementById("searchInput");if(si)si.value=_searchVal;document.querySelectorAll('.sidebar .nav[data-tab]').forEach(function(n){n.classList.remove("act");});var tb=document.querySelector('.sidebar .nav[data-tab="1"]');if(tb){tb.classList.add("act");document.querySelectorAll(".tab-page").forEach(function(p){p.style.display="none";});document.getElementById("tab1").style.display="";}if(si)setTimeout(function(){si.focus();si.setSelectionRange(si.value.length,si.value.length);},100);}
+  var oi=document.getElementById("ovSearchInput");if(oi)oi.addEventListener("focus",function(){jumpSearch("ovSearchInput");});
+  var ci=document.getElementById("clipSearchInput");if(ci)ci.addEventListener("focus",function(){jumpSearch("clipSearchInput");});
+  var ri=document.getElementById("reportSearchInput");if(ri)ri.addEventListener("focus",function(){jumpSearch("reportSearchInput");});
+// ── 侧边栏 tab 切换 ──
+document.querySelectorAll('.sidebar .nav[data-tab]').forEach(function(el){
+  el.addEventListener('click', function(){
+    var prev=_prevTab||0,cur=parseInt(el.getAttribute('data-tab'))||0;
+    document.querySelectorAll('.sidebar .nav[data-tab]').forEach(function(n){ n.classList.remove('act'); });
+    el.classList.add('act');
+    var ids=['ovSearchInput','searchInput','clipSearchInput','reportSearchInput'];
+    ids.forEach(function(id){var e=document.getElementById(id);if(e&&e.value)_searchVal=e.value;});
+    document.querySelectorAll('.tab-page').forEach(function(p){ p.style.display = 'none';p.classList.remove('slide-up','slide-down'); });
+    var tab = document.getElementById('tab' + cur);
+    if (tab){tab.style.display='';tab.classList.add(cur>=prev?'slide-up':'slide-down');}
+    _prevTab=cur;
+    setTimeout(syncSearch, 50);
+  });
+});
+
+// ── Tab 3（回忆报告）数据加载 ──
+(function(){
+  var app = document.getElementById('tab3');
+  (async function(){
+  try {
+    const m = await fetch('/api/memory/mood').then(r => r.json());
+    const r = await fetch('/api/memory/report').then(r => r.json());
+
+    var now = new Date();
+    var y = now.getFullYear(), mo = String(now.getMonth()+1).padStart(2,'0'), dd = String(now.getDate()).padStart(2,'0');
+
+    // Narrative
+    var parts = (m.sight||'。。').split('。。');
+    var narr = '这个月你的相机记录了 <b>' + (m.activeDays||'--') + '</b> 天的生活。<br><br>';
+    narr += (parts[0]||'') + '。<br><br>';
+    narr += (parts[1]||'') + '。<br><br>';
+    narr += '出现最多的地方是 <b style="color:#5E7A18;">' + (m.topPlace||'---') + '</b>，';
+    narr += '陪伴你最久的人是 <b style="color:#C7700E;">' + (m.topPerson||'---') + '</b>。';
+    narr += '整体而言，你是一位 <b>' + (m.mood||'') + '</b>。';
+
+    // Stats
+    var statsHtml = '';
+    (r.stats||[]).forEach(function(s,i){
+      statsHtml += '<div><div class="num-val" style="color:' + (s.color||'#1c1d19') + '">' + s.value + '</div><div class="num-lbl">' + s.label + '</div>' + (i===2?'<div style="font-size:9px;color:#B0AB9E;margin-top:2px">仅算本月内，周一为一周起始<br>遵循国家标准GB/T 7408.1-2023</div>':'') + '</div>';
+    });
+
+    // Keywords → 柔和色标签（频率决定大小）
+    var kwColors = ['#E8F5E9','#FFF3E0','#FFF8E1','#F3E5F5','#E0F2F1','#FBE9E7','#EFEBE9','#E8EAF6'];
+    var kwTexts = ['#2E7D32','#E65100','#F57F17','#6A1B9A','#00695C','#BF360C','#4E342E','#283593'];
+    var kwHtml = '';
+    (r.keywords||[]).forEach(function(k,i){
+      var fs = (k.style||'').match(/font-size:(\d+)/);
+      var sz = fs ? Math.min(24, Math.max(12, parseInt(fs[1]))) : 14;
+      var ci = i % kwColors.length;
+      kwHtml += '<span style="font-size:'+sz+'px;color:'+kwTexts[ci]+';background:'+kwColors[ci]+';border-radius:999px;padding:5px 14px;display:inline-block;margin:3px 4px;font-weight:500">'+k.text+'</span>';
+    });
+
+    // Places
+    var placeHtml = '';
+    (r.topPlaces||[]).forEach(function(p){
+      var w = (p.bar||'').match(/width:[^;]+/);
+      var bg = (p.bar||'').match(/background:[^;]+/);
+      placeHtml += '<div class="place-item"><div class="place-hdr"><span class="place-nm">' + p.name + '</span><span class="place-cn">' + p.count + '</span></div><div class="place-bar-bg"><div class="place-bar" style="' + (w?w[0]:'width:0') + ';' + (bg?bg[0]:'background:#ccc') + '"></div></div></div>';
+    });
+
+    // People
+    var peopleHtml = '';
+    var pcols = ['#FFD27A','#7E8FC4','#F0A6B6','#FFB07C'];
+    (r.people||[]).forEach(function(p,i){
+      var bg = p.bg || pcols[i%pcols.length];
+      peopleHtml += '<div class="person-card"><div class="pa" style="background:' + bg + '">' + (p.initial||'?') + '</div><div><div class="pn">' + (p.name||'') + '</div><div class="pc">' + (p.count||'') + '</div></div></div>';
+    });
+
+    app.innerHTML = [
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="page-tag">SenTrix·月度回忆报告</div><div class="ov-sub" style="margin-top:4px">梳理你的记忆脉络</div></div><div class="ov-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0AB9E" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="问问你的记忆：家人？猫咪？海边？盛夏？" id="reportSearchInput"></div></div>',
+      '<div class="tab-card">',
+      '<div class="rep-header">',
+        '<div><div class="rep-title">' + y + '年' + mo + '月，<br>' + (m.mood||'') + '</div>',
+        '<div class="rep-sub">' + y + '.' + mo + '.01 – ' + y + '.' + mo + '.' + dd + ' · 由 AI 根据 ' + (m.sessions||'--') + ' 个时段、' + (m.totalFrames||'--') + ' 帧生成</div></div>',
+        '<a href="/stmem.html" style="text-decoration:none"><button class="btn-regen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5E7A18" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>重新生成</button></a>',
+      '</div>',
+      '<p class="narrative">' + narr + '</p>',
+      '<div class="divider"></div>',
+      '<div class="num-grid">' + statsHtml + '</div>',
+      '',
+      '<div class="divider"></div>',
+      '<div class="sec-title">记录频度</div>',
+      '',
+      '<div style="display:flex;align-items:flex-end;gap:3px;height:200px;">',
+        (function(){ var h=''; if(m.daily&&m.daily.length){ m.daily.forEach(function(d){ var sh=2,cl='#E8E0D0'; var sj=d.sessions; var lb=parseInt(d.day)+''; if(sj>=1&&sj<4){sh=Math.min(sj*6,200);cl='#6FA15E'}else if(sj>=4&&sj<10){sh=Math.min(sj*6,200);cl='#7E8FC4'}else if(sj>=10&&sj<20){sh=Math.min(sj*6,200);cl='#F2A03D'}else if(sj>=20){sh=Math.min(sj*6,200);cl='#F5AE58'} h+='<div style="text-align:center;flex:1;max-width:20px"><div style="height:'+sh+'px;border-radius:4px 4px 2px 2px;background:'+cl+';margin:0 1px"></div><div style="font-size:7px;color:#999;margin-top:2px;white-space:nowrap">'+lb+'</div></div>'; });} else { h='<div style="height:1px;background:#ddd;flex:1"></div>'; } return h; })(),
+      '</div>',
+      '<div class="divider"></div>',
+      '<div class="sec-title">情绪节律</div>',
+      '<div style="display:flex;align-items:flex-end;gap:3px;height:100px">',
+        (function(){ var h=''; if(m.sessionEmotions&&m.sessionEmotions.length){ var last10=m.sessionEmotions.slice(-10); var emoMap={'冷清':'#6FA15E','温暖':'#F2A03D','热闹':'#F2A03D','专注':'#E8C84A','中性':'#7E8FC4'}; last10.forEach(function(d){ var cl=emoMap[d.emotion]||'#7E8FC4'; var bh=Math.min(40,Math.max(5,(d.charCount||0)/50));h+='<div style="flex:1"><div style="height:'+bh+'px;border-radius:4px;background:'+cl+';margin:0 2px"></div></div>'; }); } else { h='<div style="height:1px;background:#ddd;flex:1"></div>'; } return h; })(),
+      '</div>',
+      '<div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#6FA15E;vertical-align:middle;margin-right:4px"></span><span style="font-size:11px;color:#9A9486;vertical-align:middle">冷清</span></span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#F2A03D;vertical-align:middle;margin-right:4px"></span><span style="font-size:11px;color:#9A9486;vertical-align:middle">温暖·热闹</span></span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#E8C84A;vertical-align:middle;margin-right:4px"></span><span style="font-size:11px;color:#9A9486;vertical-align:middle">专注</span></span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#7E8FC4;vertical-align:middle;margin-right:4px"></span><span style="font-size:11px;color:#9A9486;vertical-align:middle">中性</span></span></div>',
+      '<div class="divider"></div>',
+      '<div class="sec-title">本月关键词</div><div class="kw-cloud">' + kwHtml + '</div>',
+      '<div class="divider"></div>',
+      '<div class="places-grid"><div><div class="sec-title">最常去的地方</div><div class="place-row">' + placeHtml + '</div></div><div><div class="sec-title">陪伴你的人</div><div class="people-wrap">' + peopleHtml + '</div></div></div>',
+      '<div class="footer-note">这份报告由 SentrixAI 在你的私有记忆空间内生成，原始视频与关键帧均端到端加密，仅你本人可见。</div>',
+      '</div>'
+    ].join('\n');
+  } catch(e) {
+    app.innerHTML = '<div style="color:#c00;padding:80px;text-align:center">加载失败: ' + e.message + '</div>';
+  }
+})();
+})();
+</script>
+<script>
+// ── 存储空间 API 接口（待后端接入） ──
+(function(){
+  // 调用 /api/storage/usage 获取存储用量
+  // 预期返回: { used: "12.5 MB", total: "100 MB", percent: 12.5 }
+  fetch('/api/storage/usage').then(function(r){
+    if (!r.ok) throw new Error('not ready');
+    return r.json();
+  }).then(function(d){
+    document.getElementById('storageFill').style.width = Math.min(d.percent, 100) + '%';
+    document.getElementById('storageText').textContent = d.used + ' / ' + d.total;
+  }).catch(function(){
+    // 接口未就绪时保持 -- / --
+  });
+})();
+</script>
+</body>
+</html>
