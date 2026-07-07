@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """pullsqlite.py — 导出 SQLite 记忆描述到指定文件"""
-import sqlite3, os, sys
+import sqlite3, os, sys, time
 
-OUT = "/Users/rm010/Desktop/zhx/RealMagic02/002-Stmem_Project/001-Data/memories_export.txt"
-DB = "/Users/rm010/Desktop/zhx/RealMagic02/002-Stmem_Project/001-Data/memory.sqlite"
+datestr = time.strftime("%Y%m%d")
+OUT = os.path.expanduser(f"~/zhx/RealMagic02/002-Stmem_Project/001-Data/memories_{datestr}.txt")
+DB = os.path.expanduser("~/zhx/RealMagic02/002-Stmem_Project/001-Data/memory.sqlite")
 
 db = sqlite3.connect(DB)
 rows = db.execute("SELECT id, capture_time, description FROM memories ORDER BY CAST(id AS INTEGER)").fetchall()
