@@ -1,49 +1,37 @@
 #!/usr/bin/env python3
 """01reframe.py — 批量生成全部帧的描述（全量模式）"""
-import sqlite3, os, json, subprocess, base64, sys, time, tempfile
+import sqlite3, os, json, urllib.request, base64, sys, time
 
-API_URL = "http://192.168.0.100:8000/v1/chat/completions"
-MODEL = "MiniCPM-V-4.6"
-PROMPT = "用流畅的中文描述这张图片：场景、人物、物体、动作。"
-FRAMES_DIR = "/Users/rm010/Desktop/zhx/RealMagic02/002-Stmem_Project/001-Data/frames"
-DB_PATH = "/Users/rm010/Desktop/zhx/RealMagic02/002-Stmem_Project/001-Data/memory.sqlite"
+OLLAMA_URL = "http://localhost:11434/api/generate"
+MODEL = "gemma4:e2b"
+PROMPT = "第一行用一句温暖具体、有画面感的话描述这张图片（20字以内，包含人物或具体动作，不要以「这是一张」开头），空一行后第二段开始用流畅的中文详细描述（500字以上）：场景、人物、物体、动作。描述中需自然融入氛围形容词如「安静」「专注」「温暖」「宁静」「悠闲」「热闹」等。"
+FRAMES_DIR = os.path.expanduser("~/zhx/RealMagic02/002-Stmem_Project/001-Data/frames")
+DB_PATH = os.path.expanduser("~/zhx/RealMagic02/002-Stmem_Project/001-Data/memory.sqlite")
 
-def call_minicpm(image_b64, retries=2):
+def call_ollama(image_b64, retries=2):
     for attempt in range(retries + 1):
+        data = json.dumps({
+            "model": MODEL, "prompt": PROMPT, "images": [image_b64],
+            "stream": False, "options": {"num_predict": 1024, "temperature": 0.7}
+        }).encode()
+        req = urllib.request.Request(OLLAMA_URL, data=data, headers={"Content-Type": "application/json"})
         try:
-            payload = json.dumps({
-                "model": MODEL,
-                "messages": [{"role": "user", "content": [
-                    {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + image_b64}},
-                    {"type": "text", "text": PROMPT}
-                ]}],
-                "max_tokens": 2048
-            })
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-                json.dump(json.loads(payload), f)
-                tmpfile = f.name
-            result = subprocess.run(
-                ["curl", "-s", "-X", "POST", API_URL,
-                 "-H", "Content-Type: application/json",
-                 "-d", f"@{tmpfile}"],
-                capture_output=True, text=True, timeout=300
-            )
-            os.unlink(tmpfile)
-            body = json.loads(result.stdout)
-            desc = body.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+            resp = urllib.request.urlopen(req, timeout=180)
+            desc = json.loads(resp.read()).get("response", "").strip()
             if len(desc) >= 50 or attempt >= retries:
                 return desc
             print(f"  [重试{attempt+1}: 仅{len(desc)}字]")
-        except subprocess.TimeoutExpired:
-            return ""
         except Exception as e:
-            if attempt < retries:
-                print(f"  [重试{attempt+1}: {e}]")
-            else:
-                return ""
+            print(f"\n  [API错误] {e}")
+            return ""
 
 def main():
-    frames = sorted([f for f in os.listdir(FRAMES_DIR) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
+    try:
+        urllib.request.urlopen("http://localhost:11434", timeout=3)
+    except:
+        print("错误：Ollama 未运行"); sys.exit(1)
+
+    frames = sorted([f for f in os.listdir(FRAMES_DIR) if f.endswith('.jpg')])
     if not frames:
         print("未找到帧文件"); return
 
@@ -56,19 +44,19 @@ def main():
     total = len(frames)
     ok = 0; t0 = time.time()
     for i, fname in enumerate(frames, 1):
-        fid = fname.replace('frame_', '').rsplit('.', 1)[0]
+        fid = fname.replace('frame_', '').replace('.jpg', '')
         path = os.path.join(FRAMES_DIR, fname)
         print(f"[{i}/{total}] {fname}", end="", flush=True)
         with open(path, "rb") as f:
             b64 = base64.b64encode(f.read()).decode()
-        desc = call_minicpm(b64)
+        desc = call_ollama(b64)
         if not desc: desc = "(生成失败)"
         else: ok += 1
         mtime = os.path.getmtime(path)
         cap_time = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(mtime))
         now = time.strftime("%Y-%m-%dT%H:%M:%S")
         db.execute("INSERT INTO memories (id, frame_path, description, timestamp, capture_time, model) VALUES (?, ?, ?, ?, ?, ?)",
-            (fid, fname, desc, now, cap_time, f"{MODEL}"))
+            (fid, f"data/frames/{fname}", desc, now, cap_time, f"ollama/{MODEL}"))
         db.commit()
         print(f" ({len(desc)}字)")
     elapsed = time.time() - t0
