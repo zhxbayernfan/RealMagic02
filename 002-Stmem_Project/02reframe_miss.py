@@ -43,11 +43,12 @@ def main():
     # 找缺失的帧
     frames = sorted([f for f in os.listdir(FRAMES_DIR) if f.lower().endswith(('.jpg','.jpeg','.png'))])
     db = sqlite3.connect(DB_PATH)
-    existing = set(str(r[0]) for r in db.execute("SELECT id FROM memories").fetchall())
+    existing = set(str(int(r[0])) for r in db.execute("SELECT id FROM memories").fetchall())
+    under_len = set(str(int(r[0])) for r in db.execute("SELECT id FROM memories WHERE LENGTH(description) < 500").fetchall())
     todo = []
     for fname in frames:
-        fid = fname.replace('frame_', '').rsplit('.', 1)[0]
-        if fid not in existing:
+        fid = str(int(fname.replace('frame_', '').rsplit('.', 1)[0]))
+        if fid not in existing or fid in under_len:
             todo.append((fid, fname))
     db.close()
 
@@ -76,7 +77,7 @@ def main():
         mtime = os.path.getmtime(path)
         cap_time = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(mtime))
         now = time.strftime("%Y-%m-%dT%H:%M:%S")
-        db.execute("INSERT INTO memories (id, filename, description, model, capture_time, file_size) VALUES (?, ?, ?, ?, ?, ?)",
+        db.execute("INSERT OR REPLACE INTO memories (id, filename, description, model, capture_time, file_size) VALUES (?, ?, ?, ?, ?, ?)",
             (int(fid), fname, desc, f"minicpm/{MODEL}", cap_time, os.path.getsize(path)))
         db.commit()
         print(f" ({len(desc)}字)")
