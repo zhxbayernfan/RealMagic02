@@ -57,7 +57,8 @@ def main():
         db.execute("INSERT OR REPLACE INTO memories (id, frame_path, description, timestamp, capture_time, model) VALUES (?, ?, ?, ?, ?, ?)",
             (fid, f"data/frames/{fname}", desc, now, cap_time, f"ollama/{MODEL}"))
         db.commit()
-        print(f" ({len(desc)}字)")
+        mark = "✅" if len(desc) >= 550 else "❌"
+        print(f" ({len(desc)}字){mark}")
     elapsed = time.time() - t0
     db.close()
     print(f"\n完成！{ok}/{len(todo)} 帧，耗时 {elapsed:.0f} 秒")

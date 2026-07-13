@@ -3,7 +3,7 @@
 import sqlite3, os, sys, time
 
 datestr = time.strftime("%Y%m%d")
-OUT = os.path.expanduser(f"~/lingbot-map/000Notes/02Produces/02Memories_{datestr}.txt")
+OUT = os.path.expanduser(f"~/lingbot-map/000Notes/001/02Produces/02Memories_{datestr}.txt")
 DB = os.path.expanduser("~/lingbot-map/lingbot-jszn/data/memory.sqlite")
 
 db = sqlite3.connect(DB)
