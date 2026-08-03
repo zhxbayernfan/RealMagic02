@@ -1,0 +1,43 @@
+内存紧张,暂时删除.
+内容对应"https://github.com/ysh12304124/echo/"的zhx分支.
+与主干不同步.领先8个commit,但是无建树性内容,暂未PR.
+已初步搭建眼镜APK-手机-192.168.0.200后端.
+
+未来Todos:
+第0点(最重要):逻辑整理
+
+第1点:CXR鉴权问题
+现状:眼镜录制中,手机显示记忆未开启.两个App抢CXR连接,新包名不被Rokid AI App识别.
+根因待确认:是包名问题还是授权过期?先用原始APK(e74f847)验证.
+- 用原始APK能录→问题在我们改的代码;
+- 原始APK也不能录→CXR环境/授权问题;
+- 解法:设置页面动态切换后端,原版包名不动,避免抢CXR.
+第2点:设置页面内核功能接上
+UI已提交(07271800Settings_UI),但内核还没接:
+- ApiClient.kt:从SharedPreferences读后端地址(已写好,未提交);
+- EchoApplication.kt:调ApiClient.init()(已写好,未提交);
+- Models.kt:删重复class(219-234行);
+- 编译APK,装手机测.
+第3点:后端全指向200
+- backend/.env:LLM/嵌入/算力/回调全部指向192.168.0.200(已改过,被reset冲掉);
+- CLIP:200上未部署,已禁用(VISUAL_RETRIEVAL_ENABLED=false);
+- 需要重新配置.
+第4点:全链路验证
+- 眼镜→手机(蓝牙)✅;
+- 手机→后端(WiFi)⏳(CXR问题待解决);
+- 后端→算力→Whisper✅;
+- 后端→Ollama(LLM+嵌入)✅;
+- 后端→CLIP❌(未部署);
+- 视频/音频录制→存储→查询⏳.
+第5点(灵感):设置页面保留为正式功能
+- 开发者选项切换后端,后续可包装为正式功能.
+- 用户可选"默认后端"和"自定义后端".
+- 存储后端选择到SharedPreferences,重启App生效.
+- 需征询组长意见是否保留.
+### 已完成
+- 27个API全量梳理;
+- 眼镜端代码走读+sendMessage返回值修复.
+- 200编译环境搭建(JDK+SDK+Gradle).
+- 原始APK备份(echo-hash-e74f847-Jul27.apk).
+- 设置页面UI提交.
+- 部署后端+算力+Whisper+Ollama.
