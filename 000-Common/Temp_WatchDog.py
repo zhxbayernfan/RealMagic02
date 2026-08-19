@@ -1,27 +1,40 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """温度看门狗(通用版):监控CPU/GPU温度,超阈值记录嫌疑进程并发邮件警告(只警告不杀).
-适用于组内任意Linux设备(100/200/118/153等).用法见同目录 temp_watchdog_使用说明.txt
+适用于组内任意Linux设备(100/200/118/153等).用法见同目录 Temp_WatchDog_Usage.txt
 日志:与脚本同目录 temp_watchdog.log
 """
 import subprocess, os, time, socket
 
 # ===== CONFIG(各设备部署时按需修改) =====
-THRESHOLD_C = 75          # 警告阈值(°C),CPU/GPU通用
+WARN_C      = 60          # 预警阈值(°C):常规30-40°C的机器,60°C已属异常,提前发现
+DANGER_C    = 75          # 危险阈值(°C):CPU高温线80°C/GPU降频线95°C前最后告警
 COOLDOWN_S  = 30 * 60     # 告警冷却(秒),期间不重发
 SMTP_HOST   = "smtp.qq.com"           # SMTP服务器
 SMTP_PORT   = 587
-MAIL_FROM   = "SENDER@qq.com"          # ←改成发件QQ邮箱
-MAIL_TO     = "RECEIVER@qq.com"        # ←改成收件邮箱(告警发这里)
-MAIL_PWD    = "SMTP_AUTH_CODE"         # ←改成SMTP授权码(QQ邮箱→设置→账号→开启SMTP→生成授权码)
+MAIL_FROM   = "zhxbayernfan3@qq.com"   # 发件(小号)
+MAIL_TO     = "zhxbayernfan3@qq.com"   # 收件(小号发小号,收件箱必留痕)
+MAIL_PWD    = "eglsorkdmnxgbihb"        # SMTP授权码
 HERE        = os.path.dirname(os.path.abspath(__file__))
-LOG_FILE    = os.path.join(HERE, "temp_watchdog.log")
+LOG_FILE    = os.path.join(HERE, "temp_watchdog.log")      # 告警历史(长期保留,只追加)
+OK_FILE     = os.path.join(HERE, "temp_watchdog_ok.log")   # 常规OK巡检(单行覆盖)
+NODE_HOURS  = (0, 9, 18)  # 每天这三个整点把OK快照抄送进告警历史存档
 # ==================
 
 def log(msg):
+    """告警/异常历史:只追加,长期保留."""
     line = f"{time.strftime('%Y-%m-%d %H:%M:%S')} {msg}"
     with open(LOG_FILE, "a") as f: f.write(line + "\n")
     print(line)
+
+def log_ok(msg):
+    """常规OK巡检:单行覆盖(同文件重写),零噪音;整点节点时抄送进历史存档."""
+    line = f"{time.strftime('%Y-%m-%d %H:%M:%S')} OK {msg}"
+    with open(OK_FILE, "w") as f: f.write(line + "\n")   # w=覆盖
+    print(line)
+    now = time.localtime()
+    if now.tm_hour in NODE_HOURS and now.tm_min < 5:      # 节点小时内首次巡检→存档
+        with open(LOG_FILE, "a") as f: f.write(f"{line} [节点存档 {now.tm_hour}点]\n")
 
 def get_cpu_temp():
     try:  # 优先 lm-sensors 的 Package 温度
@@ -73,6 +86,7 @@ def top_gpu_procs(n=3):
     except Exception: return []
 
 def in_cooldown():
+    # 同时看历史日志(发信成功)——冷却只由真实发信驱动
     if not os.path.exists(LOG_FILE): return False
     try:
         for ln in reversed(open(LOG_FILE).read().splitlines()):
@@ -89,28 +103,30 @@ def send_mail(subject, body):
         raise RuntimeError("CONFIG未填:请在脚本头部填好MAIL_FROM/MAIL_TO/MAIL_PWD")
     msg = MIMEText(body, "plain", "utf-8")
     msg["Subject"], msg["From"], msg["To"] = subject, MAIL_FROM, MAIL_TO
+    msg["Cc"] = MAIL_FROM   # 抄送发件人自己:QQ邮箱对Cc自己的信会存入"已发送",保证发件箱留痕
     s = smtplib.SMTP(SMTP_HOST, SMTP_PORT); s.starttls()
     s.login(MAIL_FROM, MAIL_PWD); s.send_message(msg); s.quit()
 
 def main():
     cpu_t, cpu_src = get_cpu_temp()
     gpu_t, gpu_src = get_gpu_temp()
-    if cpu_t is None and gpu_t is None:
-        log("ERROR: 读不到任何温度源"); return
     status = f"cpu={cpu_t if cpu_t is not None else 'N/A'}({cpu_src}) gpu={gpu_t if gpu_t is not None else 'N/A'}({gpu_src})"
-    hot = (cpu_t is not None and cpu_t >= THRESHOLD_C) or (gpu_t is not None and gpu_t >= THRESHOLD_C)
-    if not hot:
-        log(f"OK {status}")   # 常规巡检留痕
+    peak = max(v for v in (cpu_t, gpu_t) if v is not None) if (cpu_t is not None or gpu_t is not None) else None
+    if peak is None:
+        log("ERROR: 读不到任何温度值"); return
+    if peak < WARN_C:
+        log_ok(status)   # 常规巡检:覆盖式单行;0/9/18节点自动存档
         return
+    level = "DANGER" if peak >= DANGER_C else "WARN"
     if in_cooldown():
         return  # 冷却期内不再写日志/发信(防刷屏),温度回落后自然恢复
-    log(f"HOT {status} threshold={THRESHOLD_C}C")
-    body = (f"{socket.gethostname()} 温度告警\n{status} (阈值{THRESHOLD_C}°C)\n\n"
+    log(f"{level} {status} warn>={WARN_C}C danger>={DANGER_C}C")
+    body = (f"{socket.gethostname()} 温度{'危险' if level=='DANGER' else '预警'}\n{status} (预警线{WARN_C}°C/危险线{DANGER_C}°C)\n\n"
             "CPU占用TOP3:\n" + "\n".join("  " + x for x in top_cpu_procs()) + "\n\n"
             "GPU占用TOP3:\n" + "\n".join("  " + x for x in top_gpu_procs()) + "\n\n"
             "本看门狗只警告不杀进程,请人工处置.")
     try:
-        send_mail(f"[温度告警]{socket.gethostname()} cpu={cpu_t if cpu_t is not None else 'N/A'} gpu={gpu_t if gpu_t is not None else 'N/A'}", body)
+        send_mail(f"[温度{level}]{socket.gethostname()} cpu={cpu_t if cpu_t is not None else 'N/A'} gpu={gpu_t if gpu_t is not None else 'N/A'}", body)
         log("ALERT-SENT 邮件已发")
     except Exception as e:
         log(f"ALERT-FAIL 邮件发送失败: {e}")
