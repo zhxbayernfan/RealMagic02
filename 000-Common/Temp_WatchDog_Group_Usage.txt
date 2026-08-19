@@ -1,4 +1,4 @@
-温度看门狗使用说明(Temp_WatchDog.py)
+温度看门狗使用说明(Temp_WatchDog_Group.py)
 ========================================
 作者:组内工具(v2)
 功能:定时巡检(crontab每5分钟)设备CPU/GPU温度,双档告警(60°C预警/75°C危险),记录嫌疑进程并发邮件(只警告不杀).
@@ -21,7 +21,7 @@ temp_watchdog_ok.log 常规巡检:单行覆盖重写(永远只占1行,含最新�
 temp_watchdog.log并标注"[节点存档 N点]"——每天固定3条温度抽样,平时零噪音.
 
 三.部署步骤(每台设备一次)
-1.把Temp_WatchDog.py复制到目标设备任意目录(如 ~/ );
+1.把Temp_WatchDog_Group.py复制到目标设备任意目录(如 ~/ );
 2.编辑脚本头部CONFIG区:
   WARN_C       预警阈值°C(默认60)
   DANGER_C     危险阈值°C(默认75)
@@ -30,12 +30,12 @@ temp_watchdog.log并标注"[节点存档 N点]"——每天固定3条温度抽�
   MAIL_PWD     SMTP授权码 ←位置已留好
   (可选)SMTP_HOST/PORT 若用非QQ邮箱
   (可选)NODE_HOURS 节点存档小时,默认(0,9,18)
-3.手动试跑一次:python3 Temp_WatchDog.py
+3.手动试跑一次:python3 Temp_WatchDog_Group.py
   -看到"OK cpu=xx gpu=xx"即正常(cat temp_watchdog_ok.log看);
   -想测告警:临时把WARN_C改成比当前温度低的值(如40)再跑,收到邮件后改回60.
 4.加crontab定时,每5分钟自动巡检:
   crontab -e 添加一行:
-  */5 * * * * python3 /路径/Temp_WatchDog.py >/dev/null 2>&1
+  */5 * * * * python3 /路径/Temp_WatchDog_Group.py >/dev/null 2>&1
   (5分钟粒度+60°C预警档,从异常到高温线有2-3个巡检周期处置余量;要更敏感可改*/2)
 
 四.看日志

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """温度看门狗(通用版):监控CPU/GPU温度,超阈值记录嫌疑进程并发邮件警告(只警告不杀).
-适用于组内任意Linux设备(100/200/118/153等).用法见同目录 Temp_WatchDog_Usage.txt
-日志:与脚本同目录 temp_watchdog.log
+适用于组内任意Linux设备.用法见同目录 Temp_WatchDog_Group_Usage.txt
+日志:与脚本同目录 temp_watchdog.log(告警历史)+temp_watchdog_ok.log(常规巡检)
 """
 import subprocess, os, time, socket
 
@@ -12,9 +12,9 @@ DANGER_C    = 75          # 危险阈值(°C):CPU高温线80°C/GPU降频线95°
 COOLDOWN_S  = 30 * 60     # 告警冷却(秒),期间不重发
 SMTP_HOST   = "smtp.qq.com"           # SMTP服务器
 SMTP_PORT   = 587
-MAIL_FROM   = "zhxbayernfan3@qq.com"   # 发件(小号)
-MAIL_TO     = "zhxbayernfan3@qq.com"   # 收件(小号发小号,收件箱必留痕)
-MAIL_PWD    = "eglsorkdmnxgbihb"        # SMTP授权码
+MAIL_FROM   = "SENDER@qq.com"          # ←改成发件QQ邮箱
+MAIL_TO     = "RECEIVER@qq.com"        # ←改成收件邮箱(告警发这里)
+MAIL_PWD    = "SMTP_AUTH_CODE"         # ←改成SMTP授权码(QQ邮箱→设置→账号→开启SMTP→生成授权码)
 HERE        = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE    = os.path.join(HERE, "temp_watchdog.log")      # 告警历史(长期保留,只追加)
 OK_FILE     = os.path.join(HERE, "temp_watchdog_ok.log")   # 常规OK巡检(单行覆盖)
