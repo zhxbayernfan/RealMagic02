@@ -20,7 +20,7 @@ nx@192.168.0.46
 好
 端侧的问题开始各种出了，这是我们么探索的价值
 黎颖超
-/home/sscy/lingbot-map/000Notes/lyc1.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc1.jpg
 正在跑，之前8并发视频处理失败，我看错误是NVDEC targeted Katna scan failed，无法创建解码器设备，我就改成1并发跑一下看看
 黎颖超
 又失败了，那应该是其他问题，内存还有很多，还不知道为什么报这个错：
@@ -113,7 +113,7 @@ OK
 杨树华
 ⬅️⬅️把具体错误贴出来
 黎颖超
-/home/sscy/lingbot-map/000Notes/lyc2.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc2.jpg
 ⬅️@于新伟 我看一下
 (base) orin@ubuntu:~/sentrix-home-web$ cd /home/orin/sentrix-home-web/tools/video_keyframe/katna
 grep -rE "cuvid|nvv4l2dec|hwaccel.*cuda" *.py
@@ -127,7 +127,7 @@ run_yolo_prefilter_event_webp.py:        "-hwaccel", "cuda", "-hwaccel_output_fo
 L62（这个有点久远了）⬅️另外把Q4_K_M也部署到NX上，看是否还有问题
 黎颖超
 上午我在agx上换了Q4_K_M的模型在跑，然后看到思航跑通了两次只有图片的数据集了➡️
-/home/sscy/lingbot-map/000Notes/lyc3.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc3.jpg
 我刚跑了一遍
 杨树华
 @浦思航 咱们的Json看看是不是精简下，太复杂了小模型可能不一定好搞➡️L167
@@ -138,14 +138,14 @@ L62（这个有点久远了）⬅️另外把Q4_K_M也部署到NX上，看是否
 我感觉可以先测一下qwen3.5-4B的未量化FP16模型和4位量化Q4_K_M模型，是否能够按照要求输出正确的json
 如果还是不行的话，那得考虑微调模型或者换智力高一点的模型了➡️➡️
 杨树华
-/home/sscy/lingbot-map/000Notes/ysh1.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh1.jpg
 @黎颖超 图片都没显示，看下是为啥
 ⬅️⬅️现在就是测4km，Agx和NX都用同一个模型
 梁家华
 4km也无法输出正确的json吗➡️
 那可能得测一下未量化的qwen3.5-4B了，推理的峰值内存应该只需要12G左右，应该不会OOM
 黎颖超
-/home/sscy/lingbot-map/000Notes/lyc4.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc4.jpg
 编码我这样改了，等下测一下还有没有问题
 杨树华
 ⬅️@梁家华 http://192.168.0.118:8771/ 你把Benchmark用起来，你出的版本自己先测
@@ -153,13 +153,13 @@ L62（这个有点久远了）⬅️另外把Q4_K_M也部署到NX上，看是否
 OK
 杨树华
 最新118上跑的10天效果不错，看起来没有json的问题
-/home/sscy/lingbot-map/000Notes/ysh2.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh2.jpg
 @黎颖超 你把4km放到NX上，启动Benchmark，慢点没关系，看下效果
 梁家华
 这个用的是什么模型
 杨树华
 4km
-/home/sscy/lingbot-map/000Notes/ysh3.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh3.jpg
 /Users/rm010/Library/Application Support/LarkShell/sdk_storage/f15342a74303e96e73c82dea53392467/resources/images/img_v3_0215j_cc3b4851-2d2d-4fca-adbc-7498edcae8fg.jpg
 梁家华
 4km没问题的话那fp16也没有问题，我重点看看IQ3的吧
@@ -182,7 +182,7 @@ NX是哪个Benchmark是哪个端口，我看下分数
 我们本周一定要把NX、AGX完整跑Benchmark，多出几款模型对比下
 黎颖超
 ⬅️@杨树华 这个我已经改完了，然后在118上跑了一个带视频的数据集，已经完成了没有问题
-/home/sscy/lingbot-map/000Notes/lyc5.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc5.jpg
 思航nx上怎么没有跑通的呀
 nx上也有硬编码的问题，我改一下➡️
 浦思航
@@ -234,7 +234,7 @@ nx已经改了
 NX的代码路径发下
 AGX的也发下，我都上去看看
 梁家华
-/home/sscy/lingbot-map/000Notes/ljh1.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ljh1.jpg
 这个是qwen系列各个量化模型的指标
 杨树华
 那我们对比：Q4_K_M，reopt25和gemma-e2b
@@ -252,7 +252,7 @@ NX昨天有跑吗？➡️➡️
 ⬅️⬅️@杨树华 思航跑通了已经
 ⬅️⬅️⬅️@杨树华 OK
 杨树华
-/home/sscy/lingbot-map/000Notes/ysh4.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh4.jpg
 没有
 NX上这个iq3是谁跑的
 浦思航
@@ -271,7 +271,7 @@ NX上这个iq3是谁跑的
 浦思航
 现在nx上可以用就先用吧
 杨树华
-/home/sscy/lingbot-map/000Notes/ysh5.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh5.jpg
 太可怕了，6个多小时
 浦思航
 ⬅️这个不是量化的吗？
@@ -292,14 +292,14 @@ gemma4-e2b量化后模型输出质量差很多
 我测一下12B得
 杨树华
 嗯，我们先直接用e2b
-/home/sscy/lingbot-map/000Notes/ysh6.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh6.jpg
 NX上有错误了
-/home/sscy/lingbot-map/000Notes/ysh7.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh7.jpg
 思航昨天有跑通 4km的@黎颖超
 杨树华
-/home/sscy/lingbot-map/000Notes/Sentrix多平台验证 - Sheet1.csv➡️
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/Sentrix多平台验证 - Sheet1.csv➡️
 杨树华
-/home/sscy/lingbot-map/000Notes/ysh8.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh8.jpg
 @黎颖超 失败了？
 黎颖超
 好像是有个之前都进程没杀干净内存不够爆了，重新跑了一遍快跑完了➡️➡️
@@ -325,14 +325,14 @@ NX上有错误了
 OK
 黎颖超
 118上好像有bug，就是流水线阶段处理一直卡着，也没报错但是进度就是很长时间不动，
-/home/sscy/lingbot-map/000Notes/lyc6.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc6.jpg
 iq3用114min就跑完了，换了qwen再跑花了216min还在流水线阶段，我就先中止了。昨天用qwen-q4km跑也是，跑了400min，虽然最后跑完了，但是好像就是流水线阶段有几张资产处理失败了，然后没有报错，卡了很久，然后最后全处理完才报错某张图处理失败
-/home/sscy/lingbot-map/000Notes/lyc7.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc7.jpg
 我再跑一遍试一下，如果流水线阶段没有图片处理失败，应该就没有问题
 杨树华
 思航也帮看下
 杨树华
-/home/sscy/lingbot-map/000Notes/ysh9.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh9.jpg
 @黎颖超 你是吧118中断了吧？
 浦思航
 agx上现在什么情况？我看中断了就没启动了
@@ -353,7 +353,7 @@ ok
 哦上一次的还是oom了，我在查这个问题
 agx那边现在在跑了，暂时还没有报错
 黎颖超
-/home/sscy/lingbot-map/000Notes/lyc8.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc8.jpg
 3090上是不是流水线bug，跑了3个小时流水线都没处理完感觉不正常
 浦思航
 嗯，看起来是没进qa环节
@@ -362,10 +362,10 @@ agx那边现在在跑了，暂时还没有报错
 黎颖超
 行我看一下
 黎颖超
-/home/sscy/lingbot-map/000Notes/lyc9.png
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc9.png
 浦思航
 OK你直接改吧，我明天commit
-/home/sscy/lingbot-map/000Notes/psh1.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/psh1.jpg
 昨晚豆包没了，不知道是订阅还是额度到了
 nx的qa跑完了但是没法评分[捂脸]
 黎颖超
