@@ -1,387 +1,387 @@
-黎颖超
+lyc
 没有，目前原因应该还是内存不够，模型单独推理都没有问题，放在流程中显存可能就不够用。我看了一下流水线比较挤，它是两个任务并行，一个fast任务用clip模型进行图片嵌入，这个模型1.5个G，一个semantic任务用vlm进行图片分析，用量化的也要2~3G，就是同时加载有点不够，vlm会崩。但是流水线处理失败之后，我重启vlm服务，它可以继续完成QA问答部分
 我下一步试一下把clip模型量化一下然后把流水线两个任务改成串行看会不会崩
-杨树华 同步了 2 条消息到本群组
-杨树华
-@浦思航 你来试下把NX调通
+ysh 同步了 2 条消息到本群组
+ysh
+@psh 你来试下把NX调通
 颖超你给下ip和账密
-黎颖超
+lyc
 nx@192.168.0.46
 123456
-黎颖超
+lyc
 千问量化完的权重传到/home/nx/sentrix-home-web/model/llama/qwen3.5了
-杨树华
-@浦思航 NX上你操作的重试？我看resume了好多次➡️
-@黎颖超 Agx上qwen3.5量化跑起来了吗？
-浦思航
-⬅️@杨树华 运行的时候llama.cpp有bug，有个设置会导致爆显存，我刚一直在找问题
+ysh
+@psh NX上你操作的重试？我看resume了好多次➡️
+@lyc Agx上qwen3.5量化跑起来了吗？
+psh
+⬅️@ysh 运行的时候llama.cpp有bug，有个设置会导致爆显存，我刚一直在找问题
 现在这个可能可以，也可能还有问题
-杨树华
+ysh
 好
 端侧的问题开始各种出了，这是我们么探索的价值
-黎颖超
+lyc
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc1.jpg
 正在跑，之前8并发视频处理失败，我看错误是NVDEC targeted Katna scan failed，无法创建解码器设备，我就改成1并发跑一下看看
-黎颖超
+lyc
 又失败了，那应该是其他问题，内存还有很多，还不知道为什么报这个错：
 RuntimeError: NVDEC targeted Katna scan failed (1): 
 Device creation failed: -12.
 [h264] No device available for decoder: device type cuda needed for codec h264.
 Cannot allocate memory
-杨树华
-@梁家华 你的qwen3.5量化版用起来了，你也一起看
-梁家华
+ysh
+@ljh 你的qwen3.5量化版用起来了，你也一起看
+ljh
 这用的是哪个版本的嘞
 IQ3吗
-黎颖超
+lyc
 qwen35-reopt-main-2.5
 这是你最新的吗
-梁家华
+ljh
 对的
-黎颖超
+lyc
 OK
-梁家华
+ljh
 现在把这个部署到nx会爆内存吗
-杨树华
+ysh
 现在是Agx上
-梁家华
+ljh
 agx应该不会爆内存吧
 我就是在agx上量化和测试的
-黎颖超
+lyc
 不会啊agx64g肯定不会
 nx应该也没问题
-梁家华
+ljh
 OK
 如果reopt25测下来感觉智力不行，就回退到IQ3版本
 目前reopt25的输出质量还没有很好优化
-黎颖超
+lyc
 scan_window 函数在第 45-57 行创建了一个 FFmpeg 命令，使用 -hwaccel cuda 来启用 NVDEC 硬件加速。每次调用 scan_window 都会启动一个新的 FFmpeg 进程，这会创建一个新的 NVDEC 解码器实例。
 目前只有--target-decode-workers 控制每个视频内部的并发解码器数量，但是同时可能处理好几个视频
 orin硬件最多支持 8 路 NVDEC 并发解码，跑多段视频可能就把NVDEC 通道被占满了，我加个全局限制试一下
-浦思航
+psh
 nx上跑完了，回答质量不太行。主要问题来源于模型能力，无法返回正确格式的json，我稍微做了一点提示词优化，加了json解析失败的重试，不过还是有大量题目第一步planner的json都没对，导致根本没回答。➡️
-梁家华
+ljh
 用的是IQ3还是reopt25嘞
-浦思航
+psh
 reopt25
 不过我昨天试了IQ3，这两在json上好像差不了太多
-梁家华
+ljh
 嘶
 看来量化太狠可能不太行
 再试试f16和Q4_K_M这两个吧，看看模型本身智力是不是很难根据要求输出正确的json格式
-浦思航
+psh
 bf16的e2b在nx当前跑不了
 qwen3.54b的量化版本还又能用的吗？
-梁家华
-⬅️@浦思航 有Q4_K_M的
-浦思航
+ljh
+⬅️@psh 有Q4_K_M的
+psh
 已经在nx上了吗？
-梁家华
+ljh
 这个课还没部署到nx
 不过agx有
 在118机子上的VLM目录下
-浦思航
+psh
 那要不先在agx上测一下？
 nx上实在是太慢了
-梁家华
+ljh
 可以的
-浦思航
+psh
 我昨天那个全流程跑了好久
-梁家华
+ljh
 nx的带宽比agx小很多，decode速度应该挺够呛的
-梁家华
+ljh
 对了，nx的内存是多少嘞，端口号用户名还有密码是多少嘞
-浦思航
+psh
 nx@192.168.0.46
 123456
 统一内存16G
-梁家华
+ljh
 OK
-杨树华
-@黎颖超 agx跑通了吗？
-黎颖超
+ysh
+@lyc agx跑通了吗？
+lyc
 上午应该思航也在跑，好像不带视频的数据集可以跑，带视频因为要提取关键帧那一块有点问题，我跑了很多次，限制了处理视频的并发，只有一次成功提取了关键帧➡️
-杨树华 邀请 于新伟 加入此群，新成员入群可查看所有历史消息
-⬅️@黎颖超 关键帧有啥问题发出来，于新伟一起看
-黎颖超
+ysh 邀请 yxw 加入此群，新成员入群可查看所有历史消息
+⬅️@lyc 关键帧有啥问题发出来，yxw一起看
+lyc
 在orin118上跑，会报FFmpeg NVDEC 硬件解码器创建失败，找不到可用 CUDA 解码设备的错误➡️➡️
-于新伟 撤回了一条消息
-于新伟
+yxw 撤回了一条消息
+yxw
 收到
-于新伟
-是不是代码还是桌面 NVIDIA 的 FFmpeg CUDA/CUVID 解码方式，而 Jetson Orin 应走 nvv4l2/Jetson Multimedia 硬解路径，看一下能不能重新设置路径@黎颖超➡️
-杨树华
+yxw
+是不是代码还是桌面 NVIDIA 的 FFmpeg CUDA/CUVID 解码方式，而 Jetson Orin 应走 nvv4l2/Jetson Multimedia 硬解路径，看一下能不能重新设置路径@lyc➡️
+ysh
 ⬅️⬅️把具体错误贴出来
-黎颖超
+lyc
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc2.jpg
-⬅️@于新伟 我看一下
+⬅️@yxw 我看一下
 (base) orin@ubuntu:~/sentrix-home-web$ cd /home/orin/sentrix-home-web/tools/video_keyframe/katna
 grep -rE "cuvid|nvv4l2dec|hwaccel.*cuda" *.py
 run_katna_yolo_single.py:                "-hwaccel", "cuda", "-hwaccel_output_format", "cuda",
 run_yolo_prefilter_event_webp.py:        "-hwaccel", "cuda", "-hwaccel_output_format", "cuda",
 还真是
-于新伟
+yxw
 嗯看一下改成Jetson nvv4l2，应该就是桌面的h264解码不能直接复用
-杨树华
-@黎颖超 你优先看这个：把非视频类的Benchmark跑通，看Q4_K_M是不是还有json格式问题。编码问题让新伟看下
+ysh
+@lyc 你优先看这个：把非视频类的Benchmark跑通，看Q4_K_M是不是还有json格式问题。编码问题让新伟看下
 L62（这个有点久远了）⬅️另外把Q4_K_M也部署到NX上，看是否还有问题
-黎颖超
+lyc
 上午我在agx上换了Q4_K_M的模型在跑，然后看到思航跑通了两次只有图片的数据集了➡️
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc3.jpg
 我刚跑了一遍
-杨树华
-@浦思航 咱们的Json看看是不是精简下，太复杂了小模型可能不一定好搞➡️L167
+ysh
+@psh 咱们的Json看看是不是精简下，太复杂了小模型可能不一定好搞➡️L167
 包括提示词的看看有没有优化的地方
-@梁家华 把“JSON 正确性”从模型能力问题，改成推理框架的约束问题，可以考虑llama.cpp 下直接强制 JSON Schema，参考下
-⬅️@浦思航 Q4_K_M还有json问题吗？
-梁家华
+@ljh 把“JSON 正确性”从模型能力问题，改成推理框架的约束问题，可以考虑llama.cpp 下直接强制 JSON Schema，参考下
+⬅️@psh Q4_K_M还有json问题吗？
+ljh
 我感觉可以先测一下qwen3.5-4B的未量化FP16模型和4位量化Q4_K_M模型，是否能够按照要求输出正确的json
 如果还是不行的话，那得考虑微调模型或者换智力高一点的模型了➡️➡️
-杨树华
+ysh
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh1.jpg
-@黎颖超 图片都没显示，看下是为啥
+@lyc 图片都没显示，看下是为啥
 ⬅️⬅️现在就是测4km，Agx和NX都用同一个模型
-梁家华
+ljh
 4km也无法输出正确的json吗➡️
 那可能得测一下未量化的qwen3.5-4B了，推理的峰值内存应该只需要12G左右，应该不会OOM
-黎颖超
+lyc
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc4.jpg
 编码我这样改了，等下测一下还有没有问题
-杨树华
-⬅️@梁家华 http://192.168.0.118:8771/ 你把Benchmark用起来，你出的版本自己先测
-梁家华
+ysh
+⬅️@ljh http://192.168.0.118:8771/ 你把Benchmark用起来，你出的版本自己先测
+ljh
 OK
-杨树华
+ysh
 最新118上跑的10天效果不错，看起来没有json的问题
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh2.jpg
-@黎颖超 你把4km放到NX上，启动Benchmark，慢点没关系，看下效果
-梁家华
+@lyc 你把4km放到NX上，启动Benchmark，慢点没关系，看下效果
+ljh
 这个用的是什么模型
-杨树华
+ysh
 4km
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh3.jpg
 /Users/rm010/Library/Application Support/LarkShell/sdk_storage/f15342a74303e96e73c82dea53392467/resources/images/img_v3_0215j_cc3b4851-2d2d-4fca-adbc-7498edcae8fg.jpg
-梁家华
+ljh
 4km没问题的话那fp16也没有问题，我重点看看IQ3的吧
-杨树华
+ysh
 先看看NX上能不能跑起来
-浦思航
-L132⬅️@杨树华 我已经做了一些优化了，nx上已经在跑了。主要其实是json偶尔会少个括号之类的，我加了一些修补和重试逻辑。这两天我再把优化汇总一下到main上然后每台机器更新一下
-杨树华
+psh
+L132⬅️@ysh 我已经做了一些优化了，nx上已经在跑了。主要其实是json偶尔会少个括号之类的，我加了一些修补和重试逻辑。这两天我再把优化汇总一下到main上然后每台机器更新一下
+ysh
 你用的是哪个模型？
-浦思航
+psh
 reopt25那一次我就优化了，不然更低
 agx上我这两天没跑
-杨树华
+ysh
 NX视频也跑完了吗？
-浦思航
+psh
 是的，reopt25在nx上跑完了带视频的487qa
-杨树华
+ysh
 NX是哪个Benchmark是哪个端口，我看下分数
-@黎颖超 NX都能跑完，你AGX可以参考下cuda配置➡️
+@lyc NX都能跑完，你AGX可以参考下cuda配置➡️
 我们本周一定要把NX、AGX完整跑Benchmark，多出几款模型对比下
-黎颖超
-⬅️@杨树华 这个我已经改完了，然后在118上跑了一个带视频的数据集，已经完成了没有问题
+lyc
+⬅️@ysh 这个我已经改完了，然后在118上跑了一个带视频的数据集，已经完成了没有问题
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc5.jpg
 思航nx上怎么没有跑通的呀
 nx上也有硬编码的问题，我改一下➡️
-浦思航
+psh
 nx上那个新的完成但是有错误的是跑完的
-黎颖超
+lyc
 ok
-杨树华
-@梁家华 你列下你量化后的模型及主要差异，我们选用来跑Agx、NX和3090的对比
-杨树华
+ysh
+@ljh 你列下你量化后的模型及主要差异，我们选用来跑Agx、NX和3090的对比
+ysh
 http://192.168.0.46:8772 访问不到呀
-浦思航
+psh
 测评界面吗？是在8771
-⬅️@黎颖超 我看了一下视频题目，好像确实存在问题，你那边已经在改了吗？
-黎颖超
+⬅️@lyc 我看了一下视频题目，好像确实存在问题，你那边已经在改了吗？
+lyc
 嗯我在改
-浦思航
+psh
 [送心]
-杨树华
+ysh
 完成但有错误是什么意思？
-浦思航
+psh
 跑的过程中报错停止了
 不会改完错误续上了
 不过
-杨树华
+ysh
 跑了4小时，还好，如果我们要做3组对比，明天就得开跑，不然后天都不一定来得及
-浦思航
+psh
 光qa四个小时，算上构建估计六到七个小时了[捂脸]
 而且过程中还不能出错，昨天有个参数设置导致内存一直在缓慢增长，结果跑一半oom了
-杨树华
+ysh
 哪个参数，更新到代码里去
 我们跑对比，是不是没有必要每次都全链路➡️
-浦思航
+psh
 nx已经改了
-杨树华
+ysh
 提到主干上去
 那目前听起来，我们3平台对比gemma-e2b, qwen3.5-reopt25 是可以的
-浦思航
+psh
 我在整理了，153那边还有一些优化，以及视频那边改完我一起提吧
-杨树华
+ysh
 好[赞]
-浦思航
-⬅️@杨树华 不全链路的话变量就多了一个，不同模型构建出来的相册不太一样啊
-杨树华
+psh
+⬅️@ysh 不全链路的话变量就多了一个，不同模型构建出来的相册不太一样啊
+ysh
 从端到端角度来说确实这样，争取今晚就跑起来，明天先出一个对比，就对比 qwen3.5-reopt25
-回复 浦思航: 
+回复 psh: 
 而且过程中还不能出错，昨天有个参数设置导致内存一直在缓慢增长，结果跑一半oom了
 这种参数设定也是我们端侧需要的积累之一
-杨树华
+ysh
 NX的代码路径发下
 AGX的也发下，我都上去看看
-梁家华
+ljh
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ljh1.jpg
 这个是qwen系列各个量化模型的指标
-杨树华
+ysh
 那我们对比：Q4_K_M，reopt25和gemma-e2b
-@黎颖超 AGX昨晚跑完了吗？
-黎颖超
+@lyc AGX昨晚跑完了吗？
+lyc
 跑完了就是流水线阶段有一张图处理失败了，后续qa测评没什么问题➡️
-杨树华
+ysh
 是Q4_K_M吗？
-黎颖超
+lyc
 对
-杨树华
+ysh
 NX昨天有跑吗？➡️➡️
-⬅️@黎颖超 启动跑一遍reopt25或者gemma-e2b，全链路➡️➡️➡️
-黎颖超
-⬅️⬅️@杨树华 思航跑通了已经
-⬅️⬅️⬅️@杨树华 OK
-杨树华
+⬅️@lyc 启动跑一遍reopt25或者gemma-e2b，全链路➡️➡️➡️
+lyc
+⬅️⬅️@ysh 思航跑通了已经
+⬅️⬅️⬅️@ysh OK
+ysh
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh4.jpg
 没有
 NX上这个iq3是谁跑的
-浦思航
-我跑的，我和@黎颖超 说了可以换模型跑了
-杨树华
+psh
+我跑的，我和@lyc 说了可以换模型跑了
+ysh
 两个同时跑是不是资源有冲突，你待会跑完就先别用，让颖超先把Q4_K_M在NX上跑完
-浦思航
+psh
 不是不用这个iq3嘛，现在就可以停了换模型了➡️
 大部分bug都修了，就是不知道换模型后会不会oom
-杨树华
+ysh
 代码都更新上到主干了吗？
-浦思航
+psh
 更新了，但是还是先不要更新到agx和nx上吧，我怕新的代码还有问题
-杨树华
+ysh
 ⬅️iq3是创立训练的吗？➡️
-浦思航
+psh
 现在nx上可以用就先用吧
-杨树华
+ysh
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh5.jpg
 太可怕了，6个多小时
-浦思航
+psh
 ⬅️这个不是量化的吗？
-梁家华
+ljh
 这个gemma4_iq3xxs的应该是我之前量化的
-杨树华
+ysh
 你量化自哪个版本？
-梁家华
+ljh
 gemma4用的是gemma4-e2b，qwen用的是qwen3.5-4B
 qkm，iq、reopt这些后缀都是我量化的
-杨树华
+ysh
 gemma4-e2b量化前后对比是也发下，它不用量化应该也能跑
-梁家华
+ljh
 gemma4-e2b量化后模型输出质量差很多
-杨树华
+ysh
 那没有测试的必要，本来e2b智力就差了，你量化可以选12b这种来量化
-梁家华
+ljh
 我测一下12B得
-杨树华
+ysh
 嗯，我们先直接用e2b
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh6.jpg
 NX上有错误了
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh7.jpg
-思航昨天有跑通 4km的@黎颖超
-杨树华
+思航昨天有跑通 4km的@lyc
+ysh
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/Sentrix多平台验证 - Sheet1.csv➡️
-杨树华
+ysh
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh8.jpg
-@黎颖超 失败了？
-黎颖超
+@lyc 失败了？
+lyc
 好像是有个之前都进程没杀干净内存不够爆了，重新跑了一遍快跑完了➡️➡️
-杨树华
+ysh
 ⬅️把AGX上iq3xxs的数据填一下
 另外3090，也就是15天上，你也把这几个对比模型部署上，跑Benchmark
 153...
 [图内容是显示地址密码的 这个图就不用传了]
-杨树华
+ysh
 ⬅️⬅️后面跑验证的时候，在群里喊下，比如：118和46跑验证，请大家不要使用，使用完后通知
-梁家华
+ljh
 目前nx上是已经成功部署了qwen3.5-4B得IQ3和reopt25了吗
-杨树华
+ysh
 对，颖超部署了iq3在跑Benchmark，先别动等跑完
-黎颖超
+lyc
 是，都跑通过，但是比较极限➡️
-梁家华
+ljh
 目前只是部署好然后跑benchmark是吧，还没有正式接入整套流程
-⬅️@黎颖超 有知道decode速度在nx上是多少吗
-黎颖超
+⬅️@lyc 有知道decode速度在nx上是多少吗
+lyc
 等下单独测一下
-梁家华
+ljh
 OK
-黎颖超
+lyc
 118上好像有bug，就是流水线阶段处理一直卡着，也没报错但是进度就是很长时间不动，
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc6.jpg
 iq3用114min就跑完了，换了qwen再跑花了216min还在流水线阶段，我就先中止了。昨天用qwen-q4km跑也是，跑了400min，虽然最后跑完了，但是好像就是流水线阶段有几张资产处理失败了，然后没有报错，卡了很久，然后最后全处理完才报错某张图处理失败
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc7.jpg
 我再跑一遍试一下，如果流水线阶段没有图片处理失败，应该就没有问题
-杨树华
+ysh
 思航也帮看下
-杨树华
+ysh
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh9.jpg
-@黎颖超 你是吧118中断了吧？
-浦思航
+@lyc 你是吧118中断了吧？
+psh
 agx上现在什么情况？我看中断了就没启动了
-@黎颖超 是在改吗？还是bug没修？
-黎颖超
+@lyc 是在改吗？还是bug没修？
+lyc
 还没修
-浦思航
+psh
 那我看看吧
-黎颖超
+lyc
 OK
-浦思航
+psh
 nx上IDE占了1.1G的内存，并且杀掉之后会自动被别的主机的vscode/cursor自动拉起来。
 我已经设置了无法自动连接了，今晚也不要连上去
-黎颖超
+lyc
 ok
 我刚想看一下结果连不上去[捂脸]
-浦思航
+psh
 哦上一次的还是oom了，我在查这个问题
 agx那边现在在跑了，暂时还没有报错
-黎颖超
+lyc
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc8.jpg
 3090上是不是流水线bug，跑了3个小时流水线都没处理完感觉不正常
-浦思航
+psh
 嗯，看起来是没进qa环节
 可能是我新代码的问题
 要不你找找吧
-黎颖超
+lyc
 行我看一下
-黎颖超
+lyc
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc9.png
-浦思航
+psh
 OK你直接改吧，我明天commit
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/psh1.jpg
 昨晚豆包没了，不知道是订阅还是额度到了
 nx的qa跑完了但是没法评分[捂脸]
-黎颖超
+lyc
 现在nx可以连了吗
-杨树华
-（L300的csv）⬅️@浦思航 写在里面
-杨树华 邀请 zhx 加入此群，新成员入群可查看所有历史消息
-杨树华
-@梁家华 qwen3.5官方有量化版本吗，还有gemma4，查下发出来➡️
-杨树华
+ysh
+（L300的csv）⬅️@psh 写在里面
+ysh 邀请 zhx 加入此群，新成员入群可查看所有历史消息
+ysh
+@ljh qwen3.5官方有量化版本吗，还有gemma4，查下发出来➡️
+ysh
 你自己量化的版本和官方的有什么区别也补充下
 新消息
-梁家华
-回复 杨树华: 
-@梁家华 qwen3.5官方有量化版本吗，还有gemma4，查下发出来
-⬅️@杨树华 OK，我晚点整理一下
+ljh
+回复 ysh: 
+@ljh qwen3.5官方有量化版本吗，还有gemma4，查下发出来
+⬅️@ysh OK，我晚点整理一下
 
 
 
