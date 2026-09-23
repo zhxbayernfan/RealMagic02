@@ -160,7 +160,7 @@ OK
 [ysh]
 4km
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh3.jpg
-/Users/rm010/Library/Application Support/LarkShell/sdk_storage/f15342a74303e96e73c82dea53392467/resources/images/img_v3_0215j_cc3b4851-2d2d-4fca-adbc-7498edcae8fg.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh1.jpg
 [ljh]
 4km没问题的话那fp16也没有问题，我重点看看IQ3的吧
 [ysh]
@@ -398,7 +398,7 @@ http://192.168.1.76:8771/
 而且很奇怪，构建相册速度是nx的几倍，但是qa问答非常慢
 早上改了一下上下文参数设置现在在跑第二次
 [ysh]
-可能参数设置问题，我看颖超这里构建60张照片就1小时多了
+可能参数设置问题，我看[lyc]这里构建60张照片就1小时多了
 （L300的csv）⬅️出数据了表里填一下➡️
 [ysh] 邀请 [xy] 加入此群，新成员入群可查看所有历史消息
 [ysh] 将群名称“Sentrix on Agx & NX”修改为“Sentrix on Agx & NX & M4”
