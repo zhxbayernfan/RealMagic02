@@ -372,7 +372,7 @@ nx的qa跑完了但是没法评分[捂脸]
 现在nx可以连了吗
 [ysh]
 （L300的csv）⬅️@[psh] 写在里面
-[ysh] 邀请 zhx 加入此群，新成员入群可查看所有历史消息
+[ysh] 邀请 [zhx] 加入此群，新成员入群可查看所有历史消息
 [ysh]
 @[ljh] qwen3.5官方有量化版本吗，还有gemma4，查下发出来➡️
 [ysh]
@@ -382,3 +382,13 @@ nx的qa跑完了但是没法评分[捂脸]
 回复 [ysh]: 
 @[ljh] qwen3.5官方有量化版本吗，还有gemma4，查下发出来
 ⬅️@[ysh] OK，我晚点整理一下
+[ysh]
+@[psh] @[lyc] 你俩M4跑完后，链接发出来看下结果
+[lyc]
+http://192.168.1.76:8771/
+[ysh]
+[赞]
+487题的没跑完？
+[psh]
+现在跑，估计要跑很久
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/lyc10.jpg
