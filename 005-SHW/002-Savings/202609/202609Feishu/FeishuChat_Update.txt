@@ -160,7 +160,7 @@ OK
 [ysh]
 4km
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh3.jpg
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh1.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/ysh3.jpg
 [ljh]
 4km没问题的话那fp16也没有问题，我重点看看IQ3的吧
 [ysh]

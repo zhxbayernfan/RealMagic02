@@ -1,1 +1,4 @@
-[ysh] 1
+[ljh] 1
+[lyc] 10
+[psh] 1
+[ysh] 9
