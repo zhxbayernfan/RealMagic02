@@ -267,7 +267,7 @@ NX上这个iq3是谁跑的
 [psh]
 更新了，但是还是先不要更新到agx和nx上吧，我怕新的代码还有问题
 [ysh]
-⬅️iq3是创立训练的吗？➡️
+⬅️iq3是[lcl]训练的吗？➡️
 [psh]
 现在nx上可以用就先用吧
 [ysh]
@@ -431,3 +431,24 @@ http://192.168.1.76:8771/
 [ysh]
 （L300的csv）⬅️@[lyc] 把信息更新在这里，然后分析原因。比如是不是机器上有其它的任务在跑，或者参数设置有问题
 也跑几个少QA的对比验证
+(另一个群)
+[zhx]
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/zhx0901.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/zhx0902.jpg
+这三台，哪台是1.123，哪台是0.118，哪台是NX
+[pyp]
+118应该是我座位上的
+[zhx]
+我现在ping1.123完全ping不通
+怀疑物理死机
+但是如果你们在操作，我断电重启很显然不行
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/zhx0903.jpg
+咱们好歹，贴个标签啊哪个是哪个
+[ysh]
+接个显示器鼠标键盘看
+[ysh]
+处理完贴上一个标签，我桌上有
+[zhx]
+已处理
+0.30/0.46/1.123
+(另一个群会话结束)
