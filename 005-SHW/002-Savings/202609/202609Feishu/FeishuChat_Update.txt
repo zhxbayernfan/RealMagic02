@@ -418,10 +418,10 @@ http://192.168.1.76:8771/
 [ysh]
 好
 [ysh]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh260910.jpg
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh260911.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0910.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0911.jpg
 @[lyc] 跑了6小时才200张图片...
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh260912.jpg
-@浦[psh] 你这是没跑全链路？
-浦[psh]
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0912.jpg
+@[psh] 你这是没跑全链路？
+[psh]
 上一条就是全链路的
