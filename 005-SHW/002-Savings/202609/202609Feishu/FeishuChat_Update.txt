@@ -431,9 +431,16 @@ http://192.168.1.76:8771/
 [ysh]
 （L300的csv）⬅️@[lyc] 把信息更新在这里，然后分析原因。比如是不是机器上有其它的任务在跑，或者参数设置有问题
 也跑几个少QA的对比验证
-(另一个群)
+@[lyc] 总结下排查的结
+[lyc]
+昨天跑那么慢是因为只改了PhotoBench和llama-server的并发配置，但是Sentrix API（FastAPI/uvicorn）只有 1 个 worker 进程，这个没改所以还是顺序跑的就特别慢
+[ysh]
+[OK]
+
+
+(工程群)
 [zhx]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/zhx0901.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/zhx0901.jpg➡️
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/zhx0902.jpg
 这三台，哪台是1.123，哪台是0.118，哪台是NX
 [pyp]
@@ -451,4 +458,16 @@ http://192.168.1.76:8771/
 [zhx]
 已处理
 0.30/0.46/1.123
-(另一个群会话结束)
+[zyq]
+123是不带外壳的orin
+118是奕平座位上带壳的orin
+46nx是一直拿风扇吹的电路板完全裸露的那个电脑
+⬅️这个是orinnano
+1.123因为之前测试机器狗的时候有磕碰，网络连接有不稳定情况
+确认安全后拔电重启就行
+[zhx]
+好的 辛苦了
+中秋快乐（X）
+[zyq]
+[firecrackers]
+(工程群会话结束)
