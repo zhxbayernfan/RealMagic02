@@ -20,7 +20,7 @@
 好
 端侧的问题开始各种出了，这是我们么探索的价值
 [lyc]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0901.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0912.jpg
 正在跑，之前8并发视频处理失败，我看错误是NVDEC targeted Katna scan failed，无法创建解码器设备，我就改成1并发跑一下看看
 [lyc]
 又失败了，那应该是其他问题，内存还有很多，还不知道为什么报这个错：
@@ -113,7 +113,7 @@ OK
 [ysh]
 ⬅️⬅️把具体错误贴出来
 [lyc]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0902.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0913.jpg
 ⬅️@[yxw] 我看一下
 (base) orin@ubuntu:~/sentrix-home-web$ cd /home/orin/sentrix-home-web/tools/video_keyframe/katna
 grep -rE "cuvid|nvv4l2dec|hwaccel.*cuda" *.py
@@ -127,7 +127,7 @@ run_yolo_prefilter_event_webp.py:        "-hwaccel", "cuda", "-hwaccel_output_fo
 L62（这个有点久远了）⬅️另外把Q4_K_M也部署到NX上，看是否还有问题
 [lyc]
 上午我在agx上换了Q4_K_M的模型在跑，然后看到[psh]跑通了两次只有图片的数据集了➡️
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0903.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0914.jpg
 我刚跑了一遍
 [ysh]
 @[psh] 咱们的Json看看是不是精简下，太复杂了小模型可能不一定好搞➡️L167
@@ -138,14 +138,14 @@ L62（这个有点久远了）⬅️另外把Q4_K_M也部署到NX上，看是否
 我感觉可以先测一下qwen3.5-4B的未量化FP16模型和4位量化Q4_K_M模型，是否能够按照要求输出正确的json
 如果还是不行的话，那得考虑微调模型或者换智力高一点的模型了➡️➡️
 [ysh]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0901.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0913.jpg
 @[lyc] 图片都没显示，看下是为啥
 ⬅️⬅️现在就是测4km，Agx和NX都用同一个模型
 [ljh]
 4km也无法输出正确的json吗➡️
 那可能得测一下未量化的qwen3.5-4B了，推理的峰值内存应该只需要12G左右，应该不会OOM
 [lyc]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0904.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0915.jpg
 编码我这样改了，等下测一下还有没有问题
 [ysh]
 ⬅️@[ljh] http://192.168.0.118:8771/ 你把Benchmark用起来，你出的版本自己先测
@@ -153,14 +153,13 @@ L62（这个有点久远了）⬅️另外把Q4_K_M也部署到NX上，看是否
 OK
 [ysh]
 最新118上跑的10天效果不错，看起来没有json的问题
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0902.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0914.jpg
 @[lyc] 你把4km放到NX上，启动Benchmark，慢点没关系，看下效果
 [ljh]
 这个用的是什么模型
 [ysh]
 4km
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0903.jpg
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0903.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0915.jpg
 [ljh]
 4km没问题的话那fp16也没有问题，我重点看看IQ3的吧
 [ysh]
@@ -182,8 +181,8 @@ NX是哪个Benchmark是哪个端口，我看下分数
 我们本周一定要把NX、AGX完整跑Benchmark，多出几款模型对比下
 [lyc]
 ⬅️@[ysh] 这个我已经改完了，然后在118上跑了一个带视频的数据集，已经完成了没有问题
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0905.jpg
-pshnx上怎么没有跑通的呀
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0916.jpg
+[psh]nx上怎么没有跑通的呀
 nx上也有硬编码的问题，我改一下➡️
 [psh]
 nx上那个新的完成但是有错误的是跑完的
@@ -234,7 +233,7 @@ nx已经改了
 NX的代码路径发下
 AGX的也发下，我都上去看看
 [ljh]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ljh0901.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ljh0902.jpg
 这个是qwen系列各个量化模型的指标
 [ysh]
 那我们对比：Q4_K_M，reopt25和gemma-e2b
@@ -252,7 +251,7 @@ NX昨天有跑吗？➡️➡️
 ⬅️⬅️@[ysh] [psh]跑通了已经
 ⬅️⬅️⬅️@[ysh] OK
 [ysh]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0904.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0916.jpg
 没有
 NX上这个iq3是谁跑的
 [psh]
@@ -271,7 +270,7 @@ NX上这个iq3是谁跑的
 [psh]
 现在nx上可以用就先用吧
 [ysh]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0905.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0917.jpg
 太可怕了，6个多小时
 [psh]
 ⬅️这个不是量化的吗？
@@ -292,14 +291,14 @@ gemma4-e2b量化后模型输出质量差很多
 我测一下12B得
 [ysh]
 嗯，我们先直接用e2b
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0906.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0918.jpg
 NX上有错误了
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0907.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0919.jpg
 [psh]昨天有跑通 4km的@[lyc]
 [ysh]
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/Sentrix多平台验证 - Sheet1.csv➡️
 [ysh]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0908.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0920.jpg
 @[lyc] 失败了？
 [lyc]
 好像是有个之前都进程没杀干净内存不够爆了，重新跑了一遍快跑完了➡️➡️
@@ -307,7 +306,7 @@ NX上有错误了
 ⬅️把AGX上iq3xxs的数据填一下
 另外3090，也就是15天上，你也把这几个对比模型部署上，跑Benchmark
 153...
-[图内容是显示地址密码的 这个图就不用传了]
+[图内容是显示153地址密码的 这个图就不用传了]
 [ysh]
 ⬅️⬅️后面跑验证的时候，在群里喊下，比如：118和46跑验证，请大家不要使用，使用完后通知
 [ljh]
@@ -325,14 +324,14 @@ NX上有错误了
 OK
 [lyc]
 118上好像有bug，就是流水线阶段处理一直卡着，也没报错但是进度就是很长时间不动，
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0906.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0917.jpg
 iq3用114min就跑完了，换了qwen再跑花了216min还在流水线阶段，我就先中止了。昨天用qwen-q4km跑也是，跑了400min，虽然最后跑完了，但是好像就是流水线阶段有几张资产处理失败了，然后没有报错，卡了很久，然后最后全处理完才报错某张图处理失败
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0907.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0918.jpg
 我再跑一遍试一下，如果流水线阶段没有图片处理失败，应该就没有问题
 [ysh]
 [psh]也帮看下
 [ysh]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0909.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0921.jpg
 @[lyc] 你是吧118中断了吧？
 [psh]
 agx上现在什么情况？我看中断了就没启动了
@@ -353,7 +352,7 @@ ok
 哦上一次的还是oom了，我在查这个问题
 agx那边现在在跑了，暂时还没有报错
 [lyc]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0908.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0919.jpg
 3090上是不是流水线bug，跑了3个小时流水线都没处理完感觉不正常
 [psh]
 嗯，看起来是没进qa环节
@@ -362,10 +361,10 @@ agx那边现在在跑了，暂时还没有报错
 [lyc]
 行我看一下
 [lyc]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0909.png
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0920.png
 [psh]
 OK你直接改吧，我明天commit
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/psh0901.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/psh0902.jpg
 昨晚豆包没了，不知道是订阅还是额度到了
 nx的qa跑完了但是没法评分[捂脸]
 [lyc]
@@ -391,7 +390,7 @@ http://192.168.1.76:8771/
 487题的没跑完？
 [lyc]
 现在跑，估计要跑很久
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0910.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0921.jpg
 [psh]
 192.168.0.158:8771
 昨天跑了一版，全链路将近10个小时[捂脸]
@@ -418,15 +417,15 @@ http://192.168.1.76:8771/
 [ysh]
 好
 [ysh]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0910.jpg
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0911.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0922.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0923.jpg
 @[lyc] 跑了6小时才200张图片...
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0912.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0924.jpg
 @[psh] 你这是没跑全链路？
 [psh]
 上一条就是全链路的
 [lyc]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0911.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/lyc0922.jpg
 跑了20个小时qa才到175，我测了模型速度约为 26-27 tokens/s，按理说不应该这么慢啊
 [ysh]
 （L300的csv）⬅️@[lyc] 把信息更新在这里，然后分析原因。比如是不是机器上有其它的任务在跑，或者参数设置有问题
@@ -436,38 +435,7 @@ http://192.168.1.76:8771/
 昨天跑那么慢是因为只改了PhotoBench和llama-server的并发配置，但是Sentrix API（FastAPI/uvicorn）只有 1 个 worker 进程，这个没改所以还是顺序跑的就特别慢
 [ysh]
 [OK]
-
-
-(工程群)
-[zhx]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/zhx0901.jpg➡️
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/zhx0902.jpg
-这三台，哪台是1.123，哪台是0.118，哪台是NX
-[pyp]
-118应该是我座位上的
-[zhx]
-我现在ping1.123完全ping不通
-怀疑物理死机
-但是如果你们在操作，我断电重启很显然不行
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/zhx0903.jpg
-咱们好歹，贴个标签啊哪个是哪个
 [ysh]
-接个显示器鼠标键盘看
-[ysh]
-处理完贴上一个标签，我桌上有
-[zhx]
-已处理
-0.30/0.46/1.123
-[zyq]
-123是不带外壳的orin
-118是[pyp]座位上带壳的orin
-46nx是一直拿风扇吹的电路板完全裸露的那个电脑
-⬅️这个是orinnano
-1.123因为之前测试机器狗的时候有磕碰，网络连接有不稳定情况
-确认安全后拔电重启就行
-[zhx]
-好的 辛苦了
-中秋快乐（X）
-[zyq]
-[firecrackers]
-(工程群会话结束)
+http://192.168.0.158:8771/ 
+saas@158
+123456
