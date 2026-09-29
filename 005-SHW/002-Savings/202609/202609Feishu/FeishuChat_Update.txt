@@ -439,3 +439,20 @@ http://192.168.1.76:8771/
 http://192.168.0.158:8771/ 
 158设备用户名@密码
 158密码
+[ysh]
+@[xy] mac 适配完了吗？
+[xy]
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/xy0901.jpg
+功能是接上了
+不过现在好像还有点问题，mac上主模型进程内存占用这里用的是llama-server 进程的 phys_footprint，但测出来峰值占用才2.76G，不知道有没有漏算，问AI说是按需加载的，模型权重和视觉塔权重也不一定同时存在所以这么低，我再检查一下[捂脸]➡️
+[ysh]
+⬅️[点赞]
+[ysh]
+@[lyc] 你拉下最新的代码到M4上，楼上[xy]的适配就能看到➡️
+[lyc]
+⬅️@[ysh] [OK]
+[ysh]
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0925.jpg
+@[psh] @[xy] 这里是不是改出bug了
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202609/ysh0926.jpg
+耗时看起来也不太对
