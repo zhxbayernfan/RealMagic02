@@ -12,3 +12,5 @@
 [ysh]
 @[yxw] @[psh] @[hpq] @[ljh]  关键帧、系统和量化总结研发进展和成果明天发给我
 下周[Dr.Li]安排了汇报
+[zhx]
+Jetson_Orin部署分析_Zhx.md(P.S.即是我们的1010版)
