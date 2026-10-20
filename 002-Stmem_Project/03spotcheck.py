@@ -5,7 +5,7 @@
       python3 03spotcheck.py 10-15"""
 import sqlite3, os, base64, sys, time, subprocess, tempfile, json, re
 
-API_URL = "http://192.168.0.100:8000/v1/chat/completions"
+API_URL = "http://192.168.0.100:6276/v1/chat/completions"
 MODEL = "MiniCPM-V-4.6"
 MAX_TOKENS = 640
 PROMPT = "第一行用一句温暖具体、有画面感的话描述这张图片（20字以内，包含人物或具体动作，不要以「这是一张」开头），空一行后第二段开始用流畅的中文详细描述（500~700字）：场景、人物、物体、动作。描述中需自然融入氛围形容词如「安静」「专注」「温暖」「宁静」「悠闲」「热闹」等。写完就停，不要重复。"
@@ -61,7 +61,7 @@ def main():
         sys.exit(1)
 
     # 检查 API
-    r = subprocess.run(["curl", "-s", "--max-time", "3", "http://192.168.0.100:8000/"],
+    r = subprocess.run(["curl", "-s", "--max-time", "3", "http://192.168.0.100:6276/"],
                        capture_output=True, text=True)
     if r.returncode != 0:
         print("错误：MiniCPM API 未运行"); sys.exit(1)
