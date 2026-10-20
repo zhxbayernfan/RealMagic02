@@ -48,4 +48,26 @@ okok
 /home/orin/VLM/qwen3.5/weights/gguf/qwen35-mixed-3p1.gguf
 /home/orin/VLM/qwen3.5/weights/gguf/qwen35-mixed-3p1-mmproj.gguf
 我更新的模型会放在orin118这台机子的/home/orin/VLM/qwen3.5/weights/gguf/
+[聊天记录更新于2026-10-20 14:55]
+(来自群"任务布置群")
+[ysh]
+ysh12304124/sentrix-home-web-2.0 @[psh]
+[ysh]
+@所有人 这是系统主干基线，Q4所有的开发集成到这：
+@[yxw] 你把关键帧的内容集成进来，周六展示
+[yxw]
+Ok
+[ysh]
+@[hpq] 你把图的内容集成进来，周六展示
+@[zbx] 你把记忆构建的内容集成进来，周六展示
+[hpq]
+好的
+[ysh]
+后面[psh]主要负责召回和Agent相关，其它各块由相应的负责人维护
+[zbx]
+好的
+[ysh]
+@[lyc] 你负责运行时、任务编排和端侧适配，周六展示
+以上是系统的，所有人本周要把内容集成进来，作为下周的准入点
+需要沟通就找[psh]或者我
 [聊天记录更新于]
