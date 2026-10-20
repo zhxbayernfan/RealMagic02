@@ -26,4 +26,26 @@ AGX：192.168.0.118
 3090：192.168.0.153
 下午给[Dr.Li]演示，这四台机器请大家暂时别动，谢谢
 (来自zhx的批注:组长此言=这四台机器有标答/效果很好,可供0.200C们借鉴参考.)
+[聊天记录更新于2026-10-20 10:38]
+(来自群"识境sentrix",可能有用的信息)
+[Dr.Li]士
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/ysh1001.jpg
+@[ysh] @[zyq] 看下我们是否方便也跑一下这些数据集跟他们PK一下？谢谢➡️(L34-35,[ysh]/L36-37,[zyq])
+[ysh]
+(L33)⬅️好的
+[zyq]
+(L33)⬅️好的
+(来自群"工程群",可能有用的消息)
+[ysh]
+@[zyq] 你来输出，看对方这个能不能在M4或者NX上跑，这样对比更有目标
+我们的最新版本 @[psh] 好了说一下，刚好和业界做对比
+@[ljh] [ljh]，把你最新版可用的量化模型找一台设备放好，补充好模型信息发出来。
+我们需要的自己去拿，不用每次问你
+[ljh]
+okok
+我晚点发出来
+[ljh]
+/home/orin/VLM/qwen3.5/weights/gguf/qwen35-mixed-3p1.gguf
+/home/orin/VLM/qwen3.5/weights/gguf/qwen35-mixed-3p1-mmproj.gguf
+我更新的模型会放在orin118这台机子的/home/orin/VLM/qwen3.5/weights/gguf/
 [聊天记录更新于]
