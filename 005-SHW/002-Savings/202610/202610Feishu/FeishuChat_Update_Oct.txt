@@ -46,12 +46,12 @@ okok
 我晚点发出来
 [ljh]
 /home/orin/VLM/qwen3.5/weights/gguf/qwen35-mixed-3p1.gguf
-/home/orin/VLM/qwen3.5/weights/gguf/qwen35-mixed-3p1-mmproj.gguf
+/home/orin/VLM/qwen3.5/weights/gguf/qwen35-mixed-3p1-mmproj.gguf➡️
 我更新的模型会放在orin118这台机子的/home/orin/VLM/qwen3.5/weights/gguf/
 [聊天记录更新于2026-10-20 14:55]
 (来自群"任务布置群")
 [ysh]
-ysh12304124/sentrix-home-web-2.0 @[psh]
+ysh12304124/sentrix-home-web-2.0 @[psh]➡️
 [ysh]
 @所有人 这是系统主干基线，Q4所有的开发集成到这：
 @[yxw] 你把关键帧的内容集成进来，周六展示
@@ -70,4 +70,18 @@ Ok
 @[lyc] 你负责运行时、任务编排和端侧适配，周六展示
 以上是系统的，所有人本周要把内容集成进来，作为下周的准入点
 需要沟通就找[psh]或者我
+[聊天记录更新于2026-10-20 15:05]
+[ysh]
+⬅️@[xy] 重构后的版本你检查下是否正确，本周也把Benchmark工具的基线定下来
+[xy]
+好的
+[ysh]
+⬅️@[ljh] 你这个提供的再专业点，放一个文档在群里，把量化版本都的信息记录在里面，具体的ip和地址，可能有人不知道agx118是啥。
+@[lcl] @[pyp] 你俩训练或剪枝的模型也一样，把版本放到固定的设备固定路径，登记信息可以跟[ljh]是同一个
+[ljh]
+OK
+[pyp]
+好，我暂时还没有
+[ysh]
+专业一点，这东西就是你们的产出的产品
 [聊天记录更新于]
