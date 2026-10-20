@@ -85,13 +85,39 @@ OK
 [ysh]
 专业一点，这东西就是你们的产出的产品
 [聊天记录更新于2026-10-20 15:18]
-@[xyz] Q4你的规划是增加多模态的中的文字和语音，目标也是集成到系统里，你有思路可以先跟[Mr.Zhang,GC]讨论
+@[xyz] Q4你的规划是增加多模态的中的文字和语音，目标也是集成到系统里，你有思路可以先跟[[Mr.Zhang,GC]]讨论
 [lcl]
 3090：192.168.0.153
 地址：/home/asus/models/qwen3.5-4b-lora/
 备注：qwen3.5-4b lora微调
-(华哥的私聊)
-/home/sscy/lingbot-map/000Notes/004SHW/03DocsOfWork/Q4研发计划.pptx
+(华哥的私聊L94-L96)
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/Q4研发计划.pptx
 你自己看下哪一项可以做，先说清楚：领了任务就必须完成，如果完不成就拖大家后腿了
-(M11批注:此pptx为组长发的Q4研发计划,已存200的03DocsOfWork目录.glm5.3-flash不能直接读pptx,如需查看请用libreoffice转pdf/图片,或先提取文字再读.)
+(M11批注:此pptx为组长发的Q4研发计划.glm5.3-flash不能直接读pptx,如需查看请用libreoffice转pdf/图片,或先提取文字再读.)
+[聊天记录更新于2026-10-20 17:58]
+(来自群"任务布置群",重要信息L99-L107)
+[xy]
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/PhotoBench-2.0缺什么-20261020.md
+那个 sentrix 2.0的测评服务跟1.0版本有些功能没同步，主要是nx，agx，macmini的硬件指标计算，和稳定性的优化，让AI整理了一下。
+这个2.0版本要部署到端侧上吗，可以看看要不要同步下？[dogeface]@[lyc]➡️
+[ysh]
+必须是跑端侧，完整、稳定的跑在NX和M4上是Q4的目标
+Benchmark你先适配，[lyc]先接运行时和任务编排，本周要把基线全部完成
+[lyc]
+⬅️[ok]OK
+(来自群"识境sentrix",L109-L122)
+[ysh]
+系统版本基线：https://github.com/ysh12304124/sentrix-home-web-2.0 中午已整理好
+本周目标：基线与范围冻结
+相关任务：
+@[yxw] 关键帧完整集成([yxw]：[OK])
+@[hpq] 图构建和查询接入集成
+@[zbx] 记忆构建和查询优化集成
+@[psh] Agent查询和集成指导支持([psh]：[OK])
+@[lyc] 端侧运行时、模型编排在NX和M4上适配([lyc]：[OK])
+@[xy] Bechmark验证和适配NX、M4
+以上是涉及到系统的同学请在自己分支用Benchmark验证好数据，周五前提交PR合入主干
+@[ljh] 量化 模型放到服务器位置，设定好版本，附说明文档([ljh]：[OK])
+@[lcl] 训练 模型放到服务器位置，设定好版本，附说明文档([lcl]：[OK])
+所有内容完成后，Q4版本基线确定（[Dr.Li]：[点赞]）
 [聊天记录更新于]
