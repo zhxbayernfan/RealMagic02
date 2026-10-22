@@ -217,4 +217,50 @@ ip、账号、路径，版本写清楚，这是你们对外提供的产品或服
 [ly]
 @[ysh] 华哥，我也要申请一下，账号ncsn5➡️(L219)
 (L218)⬅️([ysh]回复：[Done])
+[聊天记录更新于2026-10-22 18:26]
+(来自群"任务布置群",重要信息L221-L)
+[ljh]
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/Qwen3.5_4B_Model_Patches.md
+[ysh]
+这条信息很重要@全体成员
+[ysh]
+@[xy] 你的Benchmark材料也放到楼上这个文档里，需要的同学直接取
+[xy]
+OK➡️(L231)
+[ysh]
+(L229)⬅️可以先把Benchmark的图片、json等放上去，我现在需要用
+[xy]
+好的，稍等
+Photobench整理benchmark data
+模型存放地址：
+存放主机：RTX 3090
+IP地址：192.168.0.153
+账户：asus
+密码：Abc123
+文件所在目录：/home/asus/xy/photobench_benchmark/
+[ljh]
+nx上这个ONNX Runtime 编译是谁的嘞，我这边测试需要的内存比较多，要12GB，可能要杀掉这个编译了
+[lyc]
+我的，在编译onnxruntime
+你要用先杀掉吧
+[ljh]
+这个要多久嘞，快完成的话，我先等等吧
+[lyc]
+目前到51%可能还要半个多小时到一个小时吧
+[ljh]
+那我一个小时后再测吧➡️(L255)
+[yxw]
+@[hpq] https://github.com/ysh12304124/sentrix-home-web-2.0/pull/2 有空可以跑一下，提交pr了([hpq]回复：[OK])➡️(L257)
+[lyc]
+(L251)⬅️@[ljh] 你测吧，磁盘满了编译失败了[新月脸]，要用photobench的话，人脸检测那一块可能要把配置改成cpu，之前nx上第一版sentrix的conda环境不知道谁删了，onnxruntime没有预编译的包，需要重新编译一下
+[ysh]
+(L253)⬅️@[yxw] 你自己测试好了没？提交到主干或者给他人的版本，自己首先要验证好，起码 benchmark 要跑通
+[yxw]
+测了华哥
+[ysh]
+赞[赞]
+[ysh]
+@[lyc] 端侧运行时是你的目标，不能每次都要安装编译好久的，要把机器、环境梳理清楚，成为这方面的专家，告诉大家怎么做，并把积累落到系统里
+[lyc]
+收到
 [聊天记录更新于]
