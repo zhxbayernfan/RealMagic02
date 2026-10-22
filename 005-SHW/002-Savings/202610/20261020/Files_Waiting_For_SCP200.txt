@@ -25,7 +25,7 @@ Files_Waiting_For_SCP200.txt
 4. 20261022_svd_lowrank.md
    - 220侧实际路径: /Users/rm010/Desktop/zhx/RealMagic02/005-SHW/002-Savings/202610/20261022/20261022_svd_lowrank.md
    - 200侧目标路径: /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/20261022_svd_lowrank.md
-   - 说明: 于新伟[yxw]发,原桌面名含连字符会产生歧义,已改下划线;关键帧与Mac部署测试进度.
+   - 说明: 于新伟[yxw]发,关键帧与Mac部署测试进度.
 
 备注:
 - Q4研发计划.pptx: 200侧已有且已阅读,无需列入.
