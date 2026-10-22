@@ -160,9 +160,9 @@ Benchmark你先适配，[lyc]先接运行时和任务编排，本周要把基线
 [ysh]
 @[yxw] @[lyc] @[hpq] @[zbx] 同步进展([yxw]回复：[OK])
 [lyc]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/SHW2.0_NX_M4_Progress.md➡️(L163)➡️(L164)
-(L162)⬅️([yxw]回复：[点赞])
-(L162)⬅️([zyq]回复：[点赞])
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/SHW2.0_NX_M4_Progress.md➡️(L164)➡️(L165)
+(L163)⬅️([yxw]回复：[点赞])
+(L163)⬅️([zyq]回复：[点赞])
 [zyq]
 @[lyc] 哪台mac上部署好了sentrix框架
 [lyc]
@@ -183,7 +183,7 @@ GitHub - ysh12304124/sentrix-home-web-2.0: 家庭记忆助手2.0➡️(L176)
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zyq1001.jpg
 @[psh] @[lyc] 目前查到部署在mac的sentrix用的还是bge的方案，是你们最终的技术选型吗，我这边测试之前确认一下➡️(L188)
 [yxw]
-华哥我在web2里没权限新建分支，帮忙填加一下哈，用户名 yuxi1996到你这了，加油➡️(L189)
+华哥我在web2里没权限新建分支，帮忙填加一下哈，用户名 yuxi1996➡️(L189)
 [psh]
 (L184)⬅️wemm在mac上没办法和生成模型同时跑，但谈不上最终选型
 (L186)⬅️([ysh]回复：[Done])
