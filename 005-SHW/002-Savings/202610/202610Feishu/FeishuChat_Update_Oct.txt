@@ -166,7 +166,7 @@ Benchmark你先适配，[lyc]先接运行时和任务编排，本周要把基线
 [zyq]
 @[lyc] 哪台mac上部署好了sentrix框架
 [lyc]
-@[zyq] rm002@192.168.1.148密码123456
+@[zyq] rm002 密码常用
 http://192.168.1.148:8772/
 http://192.168.1.148:8191/
 [zyq]
@@ -234,9 +234,9 @@ OK➡️(L231)
 Photobench整理benchmark data
 模型存放地址：
 存放主机：RTX 3090
-IP地址：192.168.0.153
-账户：asus
-密码：Abc123
+IP地址：153
+账户：153用户名
+密码：153密码
 文件所在目录：/home/asus/xy/photobench_benchmark/
 [ljh]
 nx上这个ONNX Runtime 编译是谁的嘞，我这边测试需要的内存比较多，要12GB，可能要杀掉这个编译了
@@ -256,7 +256,7 @@ nx上这个ONNX Runtime 编译是谁的嘞，我这边测试需要的内存比�
 [ysh]
 (L253)⬅️@[yxw] 你自己测试好了没？提交到主干或者给他人的版本，自己首先要验证好，起码 benchmark 要跑通
 [yxw]
-测了华哥
+测了
 [ysh]
 赞[赞]
 [ysh]
