@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Qwen3.5 vLLM 局域网调用文档</title>
+<style>
+:root{color-scheme:light;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;color:#142434;background:#f3f6f9;line-height:1.75}
+body{max-width:940px;margin:44px auto;padding:0 24px 64px}header,section{background:white;padding:28px 34px;margin:18px 0;border:1px solid #dbe3ea;border-radius:12px}h1{font-size:29px;line-height:1.3;margin:8px 0 18px}h2{font-size:21px;margin:0 0 14px}h3{font-size:17px;margin:24px 0 10px}.eyebrow{color:#47718e;font-size:13px;letter-spacing:.08em}p{margin:12px 0}a{color:#086dba}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.88em;overflow-wrap:anywhere}pre{overflow:auto;background:#102736;color:#e4f1fa;border-radius:8px;padding:18px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse;font-size:14px}td,th{border-bottom:1px solid #e0e7ed;padding:11px 8px;text-align:left;vertical-align:top}th{color:#43647c}.note{border-left:4px solid #29869e;padding:8px 16px;background:#f0f8fb}.small{font-size:13px;color:#536b7d}nav{display:flex;gap:12px;flex-wrap:wrap}nav a{text-decoration:none}li{margin:6px 0}@media print{body{margin:0;max-width:none;background:white;padding:0}section,header{break-inside:avoid;border:none;padding:16px 0}pre{color:#142434;background:#edf3f6}a{color:inherit}}
+</style>
+<header>
+<div class="eyebrow">ORIN118 · OPENAI COMPATIBLE API · 2026-10-21</div>
+<h1>Qwen3.5 vLLM 局域网调用文档</h1>
+<p>在与 Orin 同一局域网的电脑上，通过以下地址调用文字对话、流式生成、Agent 工具调用和单张图片问答。Python SDK、curl 和支持 OpenAI 兼容接口的客户端均可接入。</p>
+<table>
+<tr><th>配置项</th><th>填写内容</th></tr>
+<tr><td>Base URL</td><td><code>http://192.168.0.118:8104/v1</code></td></tr>
+<tr><td>模型名称</td><td><code>qwen35-mixed-3p1</code></td></tr>
+<tr><td>API Key</td><td>服务未启用鉴权；SDK 或客户端必填时填写 <code>EMPTY</code>。</td></tr>
+<tr><td>主要接口</td><td><code>POST /v1/chat/completions</code></td></tr>
+<tr><td>交互式接口说明</td><td><a href="http://192.168.0.118:8104/docs">http://192.168.0.118:8104/docs</a></td></tr>
+<tr><td>请求超时</td><td>建议 240 秒；冷启动期间等待健康检查成功后再调用。</td></tr>
+</table>
+<p class="note">本服务绑定局域网地址 <code>192.168.0.118</code>，无需 SSH 转发。调用方须能访问该地址与 8104 端口。多轮对话需由客户端每次提交完整的 <code>messages</code>。</p>
+<nav><a href="#quickstart">快速调用</a><a href="#python">Python</a><a href="#tools">Agent 工具调用</a><a href="#vision">图片问答</a><a href="#limits">参数与限制</a><a href="#operations">运维</a><a href="#verification">验证记录</a></nav>
+</header>
+<section id="quickstart">
+<h2>快速调用</h2>
+<p>先检查服务健康状态和可用模型。健康接口返回 HTTP 200，响应体可以为空。</p>
+<pre><code>curl --noproxy 192.168.0.118 -i --max-time 10 http://192.168.0.118:8104/health
+curl --noproxy 192.168.0.118 --max-time 10 http://192.168.0.118:8104/v1/models</code></pre>
+<p>发送文字对话：</p>
+<pre><code>curl --noproxy 192.168.0.118 --max-time 240 http://192.168.0.118:8104/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "qwen35-mixed-3p1",
+    "messages": [
+      {"role": "system", "content": "请用简洁的中文回答。"},
+      {"role": "user", "content": "17乘以19等于多少？只输出结果。"}
+    ],
+    "temperature": 0,
+    "max_tokens": 128,
+    "chat_template_kwargs": {"enable_thinking": false}
+  }'</code></pre>
+<p>结果在 <code>choices[0].message.content</code> 中；<code>usage</code> 提供 token 用量，<code>finish_reason="stop"</code> 表示正常结束，<code>"length"</code> 表示达到输出长度限制。</p>
+<p>curl 流式调用：在上面的 JSON 中添加 <code>"stream": true</code>，并给 curl 添加 <code>-N</code>。响应为 SSE，每个 <code>data:</code> JSON 事件的文本在 <code>choices[0].delta.content</code>，以 <code>data: [DONE]</code> 结束。</p>
+</section>
+<section id="python">
+<h2>Python 与 OpenAI SDK</h2>
+<pre><code>python -m pip install openai</code></pre>
+<h3>普通对话</h3>
+<pre><code>from openai import OpenAI
+import httpx
+
+client = OpenAI(
+    base_url="http://192.168.0.118:8104/v1",
+    api_key="EMPTY",
+    timeout=240.0,
+    max_retries=0,
+    http_client=httpx.Client(trust_env=False),
+)
+response = client.chat.completions.create(
+    model="qwen35-mixed-3p1",
+    messages=[
+        {"role": "system", "content": "请用简洁的中文回答。"},
+        {"role": "user", "content": "介绍一下你自己。"},
+    ],
+    temperature=0.7,
+    max_tokens=256,
+    extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+)
+print(response.choices[0].message.content)
+print(response.usage)</code></pre>
+<h3>流式输出</h3>
+<p>复用上面的 <code>client</code>：</p>
+<pre><code>stream = client.chat.completions.create(
+    model="qwen35-mixed-3p1",
+    messages=[{"role": "user", "content": "用一句话解释什么是大语言模型。"}],
+    temperature=0.7,
+    max_tokens=128,
+    stream=True,
+    extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+)
+for chunk in stream:
+    if chunk.choices:
+        text = chunk.choices[0].delta.content
+        if text:
+            print(text, end="", flush=True)
+print()</code></pre>
+</section>
+<section id="tools">
+<h2>Agent 自动工具调用</h2>
+<p>服务已配置 <code>--enable-auto-tool-choice --tool-call-parser qwen3_coder</code>。请求可以携带 <code>tools</code> 和 <code>tool_choice="auto"</code>，无需修改 Base URL 或模型名。本权重的 chat template 使用 Qwen 的 XML 函数格式，由服务转换成 OpenAI 格式的 <code>tool_calls</code>。</p>
+<p>模型负责选择工具并生成参数，实际工具由客户端执行。客户端收到工具调用后，将原 assistant 消息和对应的 <code>role="tool"</code> 结果一起加入历史，再请求模型生成最终回答。<code>tool_call_id</code> 必须匹配返回的调用 ID。</p>
+<p>以下复用上面的 <code>client</code>。库存查询使用本地固定数据演示完整往返，接入业务时替换为真实工具实现。</p>
+<pre><code>import json
+
+tools = [{"type": "function", "function": {
+    "name": "lookup_inventory",
+    "description": "Look up current inventory. Always use for stock questions.",
+    "parameters": {
+        "type": "object",
+        "properties": {"item_code": {"type": "string"}},
+        "required": ["item_code"],
+        "additionalProperties": False,
+    },
+}}]
+messages = [
+    {"role": "system", "content": "必须查询工具后回答库存，不要编造。"},
+    {"role": "user", "content": "请查询 SKU-418 当前有多少库存。"},
+]
+options = dict(
+    model="qwen35-mixed-3p1",
+    tools=tools,
+    tool_choice="auto",
+    temperature=0,
+    max_tokens=192,
+    extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+)
+first = client.chat.completions.create(messages=messages, **options)
+message = first.choices[0].message
+if not message.tool_calls:
+    raise RuntimeError(f"模型没有调用工具：{message.content}")
+messages.append({
+    "role": "assistant",
+    "content": message.content,
+    "tool_calls": [call.model_dump() for call in message.tool_calls],
+})
+for call in message.tool_calls:
+    if call.function.name != "lookup_inventory":
+        raise ValueError("未知工具")
+    args = json.loads(call.function.arguments)
+    inventory = {"SKU-418": 37}  # 本地演示数据
+    result = {"item_code": args["item_code"], "stock": inventory[args["item_code"]]}
+    messages.append({
+        "role": "tool",
+        "tool_call_id": call.id,
+        "content": json.dumps(result, ensure_ascii=False),
+    })
+final = client.chat.completions.create(messages=messages, **options)
+print(final.choices[0].message.content)</code></pre>
+<p>正常工具调用的 <code>finish_reason</code> 为 <code>tool_calls</code>，参数位于 <code>choices[0].message.tool_calls[].function.arguments</code>，类型是 JSON 字符串。流式调用需按 <code>delta.tool_calls[].index</code> 拼接函数名和参数，收齐后再解析 JSON。传入工具但希望禁止调用时可设置 <code>tool_choice="none"</code>。</p>
+<p>工具定义和工具结果也计入 4096 token 上下文预算。实际 Agent 应限制工具循环轮数，并检查最终响应是否仍包含新的 <code>tool_calls</code>。</p>
+<p class="small">格式参考：<a href="https://recipes.vllm.ai/Qwen/Qwen3.5-35B-A3B">vLLM Qwen3.5 工具调用配置</a>；本机采用已安装的 <code>qwen3_coder</code>，并保持原有 chat template。</p>
+</section>
+<section id="vision">
+<h2>单张图片问答</h2>
+<p>把调用电脑上的图片编码为 data URL 发送，服务端无需访问调用电脑的文件路径。下面复用上一节的 <code>client</code>，支持常见 PNG、JPEG、WebP 图片。</p>
+<pre><code>import base64
+import mimetypes
+from pathlib import Path
+
+image = Path("example.png")
+mime = mimetypes.guess_type(image.name)[0] or "image/png"
+data = base64.b64encode(image.read_bytes()).decode("ascii")
+response = client.chat.completions.create(
+    model="qwen35-mixed-3p1",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "image_url", "image_url": {
+                "url": f"data:{mime};base64,{data}"
+            }},
+            {"type": "text", "text": "请描述图片中的主要内容。"},
+        ],
+    }],
+    temperature=0,
+    max_tokens=256,
+    extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+)
+print(response.choices[0].message.content)</code></pre>
+<p>也可使用 <code>image_url.url</code> 传入 Orin 可以访问的 HTTP/HTTPS 图片地址；本次验收使用 base64 图片。每次请求最多一张图片，当前配置不接收视频。图片由处理器按约 262144 像素预算缩放，较小的文字和细节可能受影响。</p>
+</section>
+<section id="limits">
+<h2>参数与部署限制</h2>
+<table>
+<tr><th>项目</th><th>当前配置</th></tr>
+<tr><td>上下文</td><td>4096 token，包含消息模板、历史消息、图像 token 和输出；<code>max_tokens</code> 应小于剩余空间。</td></tr>
+<tr><td>并发</td><td>最多同时调度 2 个序列；更多请求排队，共享缓存不足时也可能等待。建议业务侧并发不超过 2。</td></tr>
+<tr><td>生成模式</td><td>默认关闭思考，普通自回归解码；未启用 MTP 推测解码。示例也显式关闭思考。</td></tr>
+<tr><td>Agent 工具调用</td><td>启用自动工具选择，parser 为 <code>qwen3_coder</code>；支持普通和流式 <code>tool_calls</code>，工具由客户端执行。</td></tr>
+<tr><td>采样</td><td>每次请求显式填写 <code>temperature</code>；确定性检查用 0，常规对话可从 0.7 开始。</td></tr>
+<tr><td>长度</td><td>每次显式填写 <code>max_tokens</code>，建议先用 128～512；其含义是最多生成多少 token。</td></tr>
+<tr><td>图片</td><td>1 张 / 请求，处理像素预算 262144；视频数量上限为 0。</td></tr>
+<tr><td>KV/cache 预算</td><td>1 GiB，显式指定；这不是整个服务的总内存上限。</td></tr>
+<tr><td>计算精度</td><td>FP16，eager 模式；无前缀缓存。</td></tr>
+<tr><td>运行环境</td><td>Jetson AGX Orin 64GB，JetPack R36.4.7 / CUDA 12.6；vLLM 0.19.0+cu126，PyTorch 2.10.0，Transformers 5.5.0。</td></tr>
+</table>
+<p class="note">权重目录中的 safetensors 是原混合量化 GGUF 的 FP32 反量化展开版，加载时转成 FP16，仍保留原量化误差。目录名中的 <code>3p1</code> 不代表此 vLLM 服务按 3.1bit kernel 运行。</p>
+</section>
+<section id="operations">
+<h2>服务管理与故障排查</h2>
+<p>以下命令在 Orin 上执行。容器已配置 <code>unless-stopped</code> 重启策略和健康检查；Docker 启动后会自动恢复未被手动停止的服务。健康检查失败本身不会触发 Docker 重启。</p>
+<pre><code># 查看状态与日志
+docker ps --filter name=qwen35-mixed-3p1-vllm
+docker inspect --format '{{.State.Health.Status}}' qwen35-mixed-3p1-vllm
+docker logs --tail 100 -f qwen35-mixed-3p1-vllm
+
+# 重启 / 停止 / 启动
+docker restart qwen35-mixed-3p1-vllm
+docker stop qwen35-mixed-3p1-vllm
+docker start qwen35-mixed-3p1-vllm
+
+# 容器被删除后，按当前配置重新创建
+bash /home/orin/VLM/qwen3.5/services/qwen35-mixed-3p1-vllm/start.sh</code></pre>
+<table>
+<tr><th>现象</th><th>处理</th></tr>
+<tr><td>连接拒绝或超时</td><td>先从调用电脑访问 <code>/health</code>；检查两台机器网络、IP 和容器状态。启动期间需等待模型加载与预热完成，首次冷启动可能需要数分钟。</td></tr>
+<tr><td>客户端 HTTP 502，但 curl 可以访问</td><td>检查系统或环境变量代理是否转发了局域网请求。Python 示例已用 <code>trust_env=False</code> 直连；其他客户端将 <code>192.168.0.118</code> 加入代理绕过名单，curl 可添加 <code>--noproxy 192.168.0.118</code>。</td></tr>
+<tr><td>HTTP 400，上下文超限</td><td>缩短历史消息、图片内容或 <code>max_tokens</code>，使总长度不超过 4096 token。</td></tr>
+<tr><td>HTTP 404，模型不存在</td><td>模型名须为 <code>qwen35-mixed-3p1</code>，通过 <code>/v1/models</code> 核对。</td></tr>
+<tr><td>内容被截断</td><td>检查 <code>finish_reason</code>；若为 <code>length</code>，在剩余上下文允许时增加 <code>max_tokens</code>。</td></tr>
+<tr><td>响应慢或内存错误</td><td>减少业务并发并检查 Orin 上其他模型的占用；查看容器日志。该机器共享内存与其他服务，响应耗时随负载变化。</td></tr>
+</table>
+<p>服务目录：<code>/home/orin/VLM/qwen3.5/services/qwen35-mixed-3p1-vllm/</code><br>
+原始权重：<code>/home/orin/VLM/qwen3.5/weights/safetensors/qwen35-mixed-3p1/</code><br>
+固定镜像：<code>ghcr.io/nvidia-ai-iot/vllm:gemma4-jetson-orin</code><br>
+镜像 ID：<code>sha256:959f59339610d5cd19f6f083b56ec710997f3bdf896afdeaec732e3d55e770b5</code></p>
+<p>权重以只读方式挂载；编译缓存保存在服务目录的 <code>cache/</code>；日志滚动保留，最多 3 个 20 MB 文件。修改启动参数时，先停止并删除这个服务的容器，再执行启动脚本；脚本检测到已有容器时只启动现有配置。</p>
+<p class="small">接口协议参考：<a href="https://docs.vllm.ai/en/latest/serving/online_serving/openai_compatible_server/">vLLM OpenAI Compatible Server</a>。当前可用参数以机器上的 vLLM 版本和本次实测为准。</p>
+</section>
+<section id="verification">
+<h2>局域网实测</h2>
+<p>2026 年 10 月 21 日，从另一台局域网电脑（服务端记录的来源 IP 为 <code>192.168.1.4</code>）直连 <code>192.168.0.118:8104</code>，以下 9 项检查全部通过；OpenAI Python SDK 的普通对话、流式输出和图片问答也全部通过。容器健康状态为 <code>healthy</code>，自动重启次数为 0。</p><table><tr><th>检查项</th><th>结果</th></tr><tr><td>健康检查</td><td>通过</td></tr><tr><td>模型列表与名称</td><td>通过</td></tr><tr><td>文字问答：17 × 19 → 323</td><td>通过</td></tr><tr><td>多轮对话记忆：蓝鲸</td><td>通过</td></tr><tr><td>SSE 流式输出：你好，收到 [DONE]</td><td>通过</td></tr><tr><td>base64 图片识别：条形图</td><td>通过</td></tr><tr><td>同时提交请求 A：2 + 3 → 5</td><td>通过</td></tr><tr><td>同时提交请求 B：6 × 7 → 42</td><td>通过</td></tr><tr><td>超长输出请求：按预期返回 HTTP 400</td><td>通过</td></tr><tr><td>OpenAI Python SDK：文字、流式、图片</td><td>3 项通过</td></tr><tr><td>交互式接口文档 /docs</td><td>HTTP 200</td></tr></table><p class="small">上述为功能验收；请求与耗时详见记录，不作为吞吐性能基准。</p>
+<h3>Agent 工具调用回归</h3>
+<p>2026 年 10 月 21 日 12:50（北京时间），补充工具调用配置后重新完成原有 9 项局域网检查，并通过下列工具协议检查。修复前，同一自动工具调用请求连续两次返回 HTTP 400，错误为缺少自动工具选择与 parser；修复后返回 HTTP 200 和结构化 <code>tool_calls</code>。</p>
+<table>
+<tr><th>检查项</th><th>实测结果</th></tr>
+<tr><td>自动工具选择</td><td><code>lookup_inventory</code>，参数 <code>{"item_code":"SKU-418"}</code>，结束原因为 <code>tool_calls</code>。</td></tr>
+<tr><td>工具结果回传</td><td>发送库存 37 的固定工具结果后，模型回答“SKU-418 当前库存为 37。”</td></tr>
+<tr><td>流式工具调用</td><td>函数名、调用 ID 和参数可完整拼接，收到 <code>[DONE]</code>。</td></tr>
+<tr><td>禁止工具调用</td><td><code>tool_choice="none"</code> 正常返回文字，不生成工具调用。</td></tr>
+<tr><td>文档 Python 工具示例</td><td>直接执行本页示例，完成 SDK 工具调用及结果回传。</td></tr>
+</table>
+<p>以上为接口和工具协议验收，本次未运行 PhotoBench 的 10QA 业务套件，原有失败评测记录不会自动更新。</p>
+<p>完整请求、响应与耗时见 <code>lan-verification.json</code>、<code>tool-verification.json</code>、<code>sdk-verification.json</code> 和 <code>doc-tool-example-verification.json</code>。在局域网客户端保留同目录的脚本和测试图片，执行 <code>bash verify.sh</code> 可统一复测普通调用与工具调用。</p>
+</section>
+</html>
