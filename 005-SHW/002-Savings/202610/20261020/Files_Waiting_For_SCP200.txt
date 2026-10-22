@@ -1,0 +1,11 @@
+Files_Waiting_For_SCP200.txt
+============================
+目的:记录因200掉线/整理中,尚未SCP到200的文件清单(220侧实际路径 -> 200侧目标路径).
+整理者:MacC011.0.1(M11)
+整理时间:2026-10-22
+
+待传文件:
+1. SHW2.0_NX_M4_Progress_Lyc.md
+   - 220侧实际路径: /Users/rm010/Desktop/zhx/RealMagic02/005-SHW/002-Savings/202610/20261022/SHW2.0_NX_M4_Progress_Lyc.md
+   - 200侧目标路径: /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/SHW2.0_NX_M4_Progress.md
+   - 说明: M10已处理,文件名为Progress_Lyc,200侧目标去_Lyc后缀.
