@@ -2,7 +2,7 @@ Files_Waiting_For_SCP200.txt
 ============================
 目的:记录因200掉线/整理中,尚未SCP到200的文件清单(220侧实际路径 -> 200侧目标路径).
 200侧目标文件名以飞书聊天记录引用名为准.
-本文件请在200恢复后删除,记得删除100侧备份.
+本文件请在200恢复后删除,记得删除100侧备份本文件/git的本文件(git message <时间戳>Files_Done_Note_Clean).
 整理者:MacC011.0.1(M11)
 整理时间:2026-10-22
 
@@ -17,10 +17,15 @@ Files_Waiting_For_SCP200.txt
    - 200侧目标路径: /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/调用文档.html
    - 说明: 即调用文档.html,本地已英文改名,200侧用聊天记录引用名"调用文档.html".
 
-3. zyq1001.jpg(传输后删除220/100的图片,不留)
+3. zyq1001.jpg(传输后删除220/100的图片,不留,git已添加gitignore,传输后删除gitignore相关行)
    - 220侧实际路径: /Users/rm010/Desktop/zhx/RealMagic02/005-SHW/002-Savings/202610/20261022/zyq1001.jpg
    - 200侧目标路径: /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zyq1001.jpg
    - 说明: 湛一奇[zyq]发图,200断线暂存02仓库待传.
+
+4. 20261022_svd_lowrank.md
+   - 220侧实际路径: /Users/rm010/Desktop/zhx/RealMagic02/005-SHW/002-Savings/202610/20261022/20261022_svd_lowrank.md
+   - 200侧目标路径: /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/20261022_svd_lowrank.md
+   - 说明: 于新伟[yxw]发,原桌面名含连字符会产生歧义,已改下划线;关键帧与Mac部署测试进度.
 
 备注:
 - Q4研发计划.pptx: 200侧已有且已阅读,无需列入.
