@@ -266,7 +266,7 @@ nx上这个ONNX Runtime 编译是谁的嘞，我这边测试需要的内存比�
 [聊天记录更新于2026-10-23 16:19]
 (来自群"任务布置群",重要信息L268-L271)
 [ysh]
-/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/ysh1001.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/Week1_Progress.md
 @所有人 18:00 前请对应同学反馈到群里，需要集成到主干的尽快
 本周目标是把基线冻结
 [聊天记录更新于]
