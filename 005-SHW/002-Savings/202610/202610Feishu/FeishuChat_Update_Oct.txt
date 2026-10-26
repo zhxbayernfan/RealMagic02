@@ -380,11 +380,17 @@ good，那提 pr 合入吧
 那我这个方案 先在qabench里 测试 后续再装回SHW的主体FMA里咯
 [psh]
 可以
-(来自群"识境sentrix",可能有用的信息,L31-L37)
+(来自群"识境sentrix",可能有用的信息,L384-L389)
 [ysh]
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/Week2_Progress.md
 @全体成员 本周任务和目标，需要合入系统的请大家尽量周四完成验证和提交 pr
 以上所有内容都一对一沟通过，如有问题及时找我反馈[双手合十]
 有问题都可以在这里或者工程群反馈，实在不行就找对应的负责人或我
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/Q4研发计划.pptx-P3截图
+[聊天记录更新于2026-10-26 17:23]
+(同一提案报给组长,L392-L395)
+[ysh]
+现在就是这么做的，你多看下
+[zhx]
+收到
 [聊天记录更新于]
