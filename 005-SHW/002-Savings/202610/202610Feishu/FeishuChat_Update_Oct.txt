@@ -300,25 +300,25 @@ nx上这个ONNX Runtime 编译是谁的嘞，我这边测试需要的内存比�
 [lcl]
 (L269)⬅️@[ysh] 本周完成了 PhotoBench 混合相册数据盘点和训练/验证集冻结。原相册334张图片、10个视频保持不变，1,167道QA中隔离5道缺少评分标签的问题，其余按事件、媒体及视频来源关系分组，分层划分为930道训练题和232道验证题，验证题未混入训练数据。从训练侧历史评估中导出2分记录，进一步得到模型输入输出完整、未出现验证集媒体标识的候选轨迹。相册、两套QA和轨迹均已导入100服务器，划分及验收记录保存在 artifacts/photobench_split80_20261023_v1/
 [xyz]
-(L269)⬅️@[ysh] 本周在本地系统构建了音频模态的转写对齐与存储链路,并在网上公开数据集上测试对比了几个音频模型的准确率➡️(L312)
+(L269)⬅️@[ysh] 本周在本地系统构建了音频模态的转写对齐与存储链路,并在网上公开数据集上测试对比了几个音频模型的准确率➡️(L313)
 [xy]
 (L269)⬅️@[ysh]  本周围绕 PhotoBench 2.0 单仓库完成 3090/NX/AGX/Mac mini 
 四平台兼容测评：统一固化端侧指标公式（3090 按端口/PID 归属，NX/AGX 按整机内存、smaps+nvmap、产品 PSS，
 Mac 拆分 footprint/权重/容量），补齐 null/过期语义与 Judge 标准化，并用四平台真实样本复算通过（昨天完成10QA测试）；
 进程与服务拓扑收敛到 `runtime_connection.json` 单一来源、按 run 冻结；同时运行稳定性优化和前端进度展示优化。
-代码已通过完整 CI（2915 项、覆盖率 94.17%），合并 `main` 后提交 PR；剩余部分更新真机回归测试（现在4个设备都有任务在跑，测不了）。并在网上公开数据集上测试对比了几个音频模型的准确率➡️(L315)
+代码已通过完整 CI（2915 项、覆盖率 94.17%），合并 `main` 后提交 PR；剩余部分更新真机回归测试（现在4个设备都有任务在跑，测不了）。并在网上公开数据集上测试对比了几个音频模型的准确率➡️(L316)
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/xy1001.jpg
 ([ysh]回复：[点赞])
 [ysh]
-(L302)⬅️@[xyz] 以后没有本地概念，所有的建设围绕https://github.com/ysh12304124/sentrix-home-web-2.0来，这样工作才可以被检查，其他人也能验证到
+(L303)⬅️@[xyz] 以后没有本地概念，所有的建设围绕https://github.com/ysh12304124/sentrix-home-web-2.0来，这样工作才可以被检查，其他人也能验证到
 [在md上更改"[xyz]"任务行状态为进行中]
 已登记，本周任务你这里暂不算达标
-(L304)⬅️@[xy] pr 是刚提交的吗？➡️(L319)
+(L305)⬅️@[xy] pr 是刚提交的吗？➡️(L321)
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/ysh1001.jpg
 [在md上更改"[xy]"任务行状态为已复核]
 @[psh] 你把[xy]的也准入进来在跑 benchmark 吧([psh]回复：[OK])
 [xy]
-(L315)⬅️@[ysh] 是的。
+(L316)⬅️@[ysh] 是的。
 [ysh]
 没反馈的同学速度
 [hpq]
@@ -326,18 +326,18 @@ Mac 拆分 footprint/权重/容量），补齐 null/过期语义与 Judge 标准
 [ysh]
 测评结果出来了你告诉我
 [zbx]
-(L269)⬅️@[ysh] 在修改项目的记忆构建和检索和之前不一致的地方，修改后的版本结果还没有出来，有提升后会提交pr➡️(L329)
+(L269)⬅️@[ysh] 在修改项目的记忆构建和检索和之前不一致的地方，修改后的版本结果还没有出来，有提升后会提交pr➡️(L331)➡️➡️(L368)
 [ysh]
-(L327)⬅️@[zbx] ok，结果出来后告诉我是否可以题
+(L329)⬅️@[zbx] ok，结果出来后告诉我是否可以题
 [zbx]
 嗯嗯，收到
 [zyq]
-(L269)⬅️@[ysh] sentrix主基线为适配comindx有关benchmark的适配修改已提交➡️(L338)
+(L269)⬅️@[ysh] sentrix主基线为适配comindx有关benchmark的适配修改已提交➡️(L340)
 (截图为PR#6的网页,此处不放,纯浪费空间)
 [lyc]
 (L269)⬅️@[ysh] 本周将 Sentrix Home Web 2.0 部署到本地 Mac Mini M4（16GB 统一内存），完成全链路跑通。NX部署进行中，由于更换python3.11，兼容的pytorch、onnxruntime等在aeech64没有预编译的包，需要重新源码编译。
 [ysh]
-(L333)⬅️@[zyq] 赞，benchmark 对比结果出得来吗？
+(L335)⬅️@[zyq] 赞，benchmark 对比结果出得来吗？
 [ljh]
 (L269)⬅️@[ysh] 已经将量化后的模型地址，具体参数，质量基线以及各量化模型的测试指标总结到文档里面了qwen3.5-4B模型版本，最新量化模型在Sentrix Home web 2.0上的测试还在进行中
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/Qwen3.5_4B_Model_Patches.md(已更新)
@@ -345,5 +345,25 @@ Mac 拆分 footprint/权重/容量），补齐 null/过期语义与 Judge 标准
 @[ysh] 其中一项benchmark跟comindx披露只差五个点，其他benchamrk还在大范围建库中，耗时较长
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zyq1001.jpg
 [ysh]
-优秀
+优秀[点赞]
+[聊天记录更新于2026-10-26 15:30]
+(来自群"任务布置群",重要信息L351-L368)
+[hpq]
+评测比较慢，只跑了这一个数据集@[ysh]➡️(L356)
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/hpq1001.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/hpq1002.jpg
+[ysh]
+(L352)⬅️@[hpq] 结论是什么？图能应用到现有系统且提高评测吗？
+[hpq]
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/hpq1003.jpg
+有提升，但目前在现有记忆上构建的图提升不多➡️(L361)
+[ysh]
+(L359)⬅️@[hpq] 2.0 里的 agent 查询用上你的图了吗？还是说你只是做了建图？
+[hpq]
+用了
+[ysh]
+good，那提 pr 合入吧
+[hpq]
+[ysh]
+(L329)⬅️⬅️@[zbx] 验证结果如何？
 [聊天记录更新于]
