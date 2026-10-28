@@ -385,7 +385,7 @@ good，那提 pr 合入吧
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/Week2_Progress.md
 @全体成员 本周任务和目标，需要合入系统的请大家尽量周四完成验证和提交 pr
 以上所有内容都一对一沟通过，如有问题及时找我反馈[双手合十]
-有问题都可以在这里或者工程群反馈，实在不行就找对应的负责人或我
+有问题都可以在这里或者工程群(zhx批注:即是任务布置工程群)反馈，实在不行就找对应的负责人或我
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/Q4研发计划.pptx-P3截图
 [聊天记录更新于2026-10-26 17:23]
 (同一提案报给组长,L392-L395)
@@ -393,4 +393,36 @@ good，那提 pr 合入吧
 现在就是这么做的，你多看下
 [zhx]
 收到
+[聊天记录更新于2026-10-28 09:54]
+(来自群"任务布置群",重要信息L398-L4)
+[ysh]
+@[psh] 2.0 的流水线也明显比 1.0 的慢，你尽快分析下是什么原因，跑了那么久，才 249/344图片进度
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/ysh1002.jpg
+[psh]
+我今天已经做了一天的这个工作了
+[ysh]
+[赞]心有灵犀
+[psh]
+我这两天应该可以完成工程上提速的优化
+[pyp]
+我昨晚在自己mac上复现sentrix2.0原版的时候，benchmark不知道为什么在处理完流水线之后卡住了，今天我重新跑一下也看看。
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/pyp1001.jpg
+[ysh]
+问题记录下来，如果有现场的信息更好
+[pyp]
+我这边今天过后应该写个文档记录卡住的一次和完整的一次
+[ysh]
+可以让 AI 分析下为什么断了
+[pyp]
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/pyp1002.jpg
+进到QA了[赞]
+[ysh]
+[赞]
+差不多，现在就这个水平，[psh]almost 定位到问题了
+[zhx]
+在当前的答题逻辑前，增加了一条问题分类的判断结构+回答问题去不同的关键词仓库获取答案，已在3090部署。487qa初始基线(未优化前) 108分钟完成 得分0.928分
+优化后114分钟完成,得分1.096分。耗时略微增加6分钟，质量提升近0.2分。其中0分题从初始的211题下降到107题。但2分题数量下降176题降到158题，和多轮问答题得分少量下降——代价是检索定向改变了部分题的召回路径。
+现已在M4上部署同套代码进行测试，继续探索中。
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zhx1001.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zhx1002.jpg
 [聊天记录更新于]
