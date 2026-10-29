@@ -394,7 +394,7 @@ good，那提 pr 合入吧
 [zhx]
 收到
 [聊天记录更新于2026-10-28 09:54]
-(来自群"任务布置群",重要信息L398-L4)
+(来自群"任务布置群",重要信息L398-L427)
 [ysh]
 @[psh] 2.0 的流水线也明显比 1.0 的慢，你尽快分析下是什么原因，跑了那么久，才 249/344图片进度
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/ysh1002.jpg
@@ -425,4 +425,65 @@ good，那提 pr 合入吧
 现已在M4上部署同套代码进行测试，继续探索中。
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zhx1001.jpg
 /home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zhx1002.jpg
+[聊天记录更新于2026-10-29 15:44]
+(来自群"任务布置群",L430-L488)
+[ysh]
+(图见于下方网页hpq部分)
+@[hpq] 验证里图的效果给出统计数据并分析下效果如何
+补充在问题里
+[hpq]
+好的
+[ysh]
+跑系统要验证自己负责的内容，如果只是部署代码截结果，AI 就可以干了不需要人
+[ysh]
+@[hpq] 时耗的统计有吗？
+@所有人 [pyp]的结论都去看看，尤其是自己的部分，回复在它问题的后面
+@[lyc] NX 结果出来后，总结也补上
+[pyp]
+我那个HAWK算法适配移植我还在考虑做在哪里，咱们这个应用架构是适合直接嵌在llama里面还是放在库里面搞个什么补丁，我暂时不知道后一种是否可行
+[ysh]
+AI 时代结论就是都要，你拉一个分支自己测试验证，benchmark 跑了看数据，哪个优秀就用哪个
+[ysh]
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/ysh1003.jpg
+@[zbx] 这个 pr 对应的 benchmark 结果发出来看下➡️(L461)
+[ysh]
+@所有人 再强调下：
+合入主干只能通过提交 PR，不可以直接合入主干
+提交 PR 除自己的特性测试完备，必须有 benchmark 验证结果
+[pyp]
+sentrix home 2.0 在不同平台上都是用llama.cpp吗？之前的vLLM是做什么的？
+[zyq]
+@[psh] benchmark豆包测评的最高速率有测试过吗，有没有出现拒绝请求的情况
+[psh]
+没有测过，12并发请求几乎没有被拒绝过
+主要是回答的速度实际上都慢于评测吧
+[zbx]
+(L448)⬅️/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zbx1001.png
+([ysh]回复：[点赞])
+[ysh]
+[赞]
+昨天[psh]已经重新提交过，时耗已经明显下降，下图是我昨晚跑的
+@[zbx] 重新拉主干合入最新代码，再跑一次 benchmark 后提交pr
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/ysh1004.jpg
+比你的少 6 小时
+[zbx]
+好的
+[ysh]
+git协作就这样，谁先合入了，后面的同学要重新合
+@[zyq] @[xyz] @[xy] 你们还没登记结果
+@[lyc] NX 还没好嘛？一周多了[流泪]
+[xy]
+Mac上我跑的我整理过的1000+QA版本，还在跑，估计得明天才能跑完[捂脸]
+([ysh]回复：[OK])
+[lyc]
+今天能跑完，跑完了我再提交pr
+之前跑了好几次，流水线跑完才报错，跑一次耗时太久了时间成本有点高，加了一些深度健康检查的，跑之前先检查各个服务状态
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/lyc1001.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/lyc1002.jpg
+[zyq]
+在加急跑，下午能提交
+[xyz]
+华哥我跑成1k的了快跑完了[捂脸]
+[ysh]
+ok，尽量别拖到周五
 [聊天记录更新于]
