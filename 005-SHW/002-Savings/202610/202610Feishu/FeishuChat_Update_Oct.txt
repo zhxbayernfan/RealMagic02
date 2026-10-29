@@ -430,13 +430,13 @@ good，那提 pr 合入吧
 [ysh]
 (图见于下方网页hpq部分)
 @[hpq] 验证里图的效果给出统计数据并分析下效果如何
-补充在问题里
+补充在问题里(图见于L557)
 [hpq]
 好的
 [ysh]
 跑系统要验证自己负责的内容，如果只是部署代码截结果，AI 就可以干了不需要人
 [ysh]
-@[hpq] 时耗的统计有吗？
+@[hpq] 时耗的统计有吗？(图见于L558)
 @所有人 [pyp]的结论都去看看，尤其是自己的部分，回复在它问题的后面
 @[lyc] NX 结果出来后，总结也补上
 [pyp]
@@ -487,7 +487,7 @@ Mac上我跑的我整理过的1000+QA版本，还在跑，估计得明天才能�
 [ysh]
 ok，尽量别拖到周五
 [聊天记录更新于2026-10-29 16:03]
-(网页dogfooding收集)
+(网页dogfooding收集范例,L491-L499)
 [ysh]
 M4验证结果
 - benchmark 任务截图
@@ -497,8 +497,15 @@ M4验证结果
 - 问题反馈
     - 耗时长达 16 小时+，其中流水线 6 小时+，QA 测评 10+小时
     - 质量均分有所提高，达到 1.2分，分析是否有关联
-
-[ysh]
+[聊天记录更新于2026-10-29 16:29]
+(网页dogfooding收集范例,L501-L655)
+任务要求
+1. 每人在自己 M4 上部署2.0 版本（https://github.com/ysh12304124/sentrix-home-web-2.0）
+2. 跑 487 题用例，模型使用[ljh]的 q4km，个别特别安排如下
+  1. [xy]、[psh]、[yxw]、[ly]、[ljh]跑1000+测试集
+  2. [lcl]模型使用自己的定训练模型
+3. 跑完用例后按[ysh]格式填写结果和问题反馈
+[zyq] (尚未填入，下一次更新补录)
 M4验证结果
 - benchmark 任务截图
 
@@ -506,20 +513,139 @@ M4验证结果
 
 - 问题反馈
 
-[ysh]
+[lyc]
+1.M4验证结果
+- benchmark 任务截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/lycTaskScreenshot1029.jpg
+- benchmark 关键指标截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/lycKeyMetricsScreenshot1029.jpg
+- 问题反馈
+2. NX 验证结果(尚未填入，下一次更新补录)
+- benchmark 任务截图
+
+- benchmark 关键指标截图
+
+- 问题反馈
+
+[psh]
+M4验证结果
+- benchmark 任务截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/pshTaskScreenshot1029.jpg
+（上面是纯1167qa，下面是纯离线建库）
+- benchmark 关键指标截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/pshKeyMetricsScreenshot1029.jpg
+补充:共同 484 题：judge 0.975→1.103、墙钟 161→91s、步数 5.24→3.30
+- 问题反馈
+1.检索平均 4.52s（p50 4.27、p90 5.88），1323/1328 是 qdrant、degraded=0，不是冷启动；
+  原因是 graph 通道对所有查询都参与融合（6 通道全开），1328 次约 100 分钟，占整轮 5–6%。
+2.质量短板集中在小类：fact_retrieval 0.583（12）、media_retrieval 0.571（7）、clarification 0.4（5）、event_summary 0.778（9）；
+  强项是 evidence_insufficient 1.259、single_evidence 1.135、multi_turn 1.104。
+[zbx]
+M4验证结果
+- benchmark 任务截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zbxTaskScreenshot1029.jpg
+- benchmark 关键指标截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zbxKeyMetricsScreenshot1029_1.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/zbxKeyMetricsScreenshot1029_2.jpg
+- 问题反馈
+/
+[hpq]
+M4验证结果
+- benchmark 任务截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/hpqTaskScreenshot1029.jpg
+- benchmark 关键指标截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/hpqKeyMetricsScreenshot1029_1.jpg
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/hpqKeyMetricsScreenshot1029_2.jpg
+- 问题反馈
+1.总耗时长达14+小时，流水线处理耗时5.85小时，测评耗时8+小时。
+2.图结构效果在单证据记忆和证据不足的问题上效果较差，分析原因可能是对于单证据类型的简单问题图结构拓展召回的证据可能会挤掉基线检索到的正确的答案，
+  对于证据不足类型的问题在没有可靠证据时，图可能会把邻近但无关的事件、人物或图片补进来，增加误召回。
+[yxw]
+M4验证结果
+- benchmark 任务截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/yxwTaskScreenshot1029.jpg
+- benchmark 关键指标截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/yxwKeyMetricsScreenshot1029.jpg
+总结：1167/1167 条，运行时间约 18 小时 6 分钟；QA 和 Judge 均完成，无 fatal error。模型为 qwen3.5-4b-q4km。
+Judge 有效评分 1166 条：2 分 207 条（17.8%）、1 分 422 条（36.2%）、0 分 537 条（46.1%）；
+另有 1 条没有 Judge 分数。平均质量分为 0.717/2，73 条以视频为 GT 的问题。其中 19 条检索轨迹出现关键帧预览；针对视频帧的问题不明确。
+- 问题反馈
+  1、1167 条题里，纯视频 QA 只有 52 条、只引用 10 段视频，发现单个视频的时候没有事件划分的bug，正在修复。
+  2、关键帧描述为空却仍被标记处理成功的问题。当前代码只在证据帧数大于 3 时才对空分析重试；这批视频每次送入 3 帧，空结果没有触发重试。
+  3、19 条视频 GT 问题出现关键帧候选，6 条候选来自错误视频。后续工作父视频 ID 做候选过滤和匹配，再评估关键帧召回，提升召回率。
+  4、（进行中 29日下午完成）53 段原始视频、52 道纯视频题YOLO/Katna 流水线对此 SVD，再按两组对比设置默认关键帧方法。
+[xyz](尚未填入，下一次更新补录)
 M4验证结果
 - benchmark 任务截图
 
 - benchmark 关键指标截图
 
 - 问题反馈
-[ysh]
+[ljh]
 M4验证结果
 - benchmark 任务截图
-
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/ljhTaskScreenshot1029.jpg
 - benchmark 关键指标截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/ljhKeyMetricsScreenshot1029.jpg
+- 问题反馈
+1. 视频预处理故障，直接造成一部分题缺少证据
+- 10 个视频全部因带时区与不带时区的时间戳相减而失败，没有生成视频关键帧记忆。涉及视频标注的 80 题，视频交付召回为零
+2. Judge 与归因记录不完整
+- 9 题无有效分数、Judge 归因全为 na，初步推断是平台的小bug
+3. 找到包含正确答案的候选图，但是最后选错或者没有交付（250条题目候选证据已经齐全，但是仍然零分
+- 建库问题：
+  - 错误OCR被保存后，后续回答反复继承。read_photo_text 只读取落库 OCR，不会重新识别原图。所以反复调用同一个读字工具，既不能纠错，也不能补齐缺失文字。
+  - “错误、冲突信息已进入记忆”。尚且不能确定究竟是原始的GPS、地点解析、标准答案还是地点表述粒度出现了问题
+[pyp]
+M4验证结果
+- benchmark 任务截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/pypTaskScreenshot1029.jpg
+- benchmark 关键指标截图
+只选取了相对较完整的最后一次：（QA评测时间不太可信，因为后续分了多个模型额度去跑）
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/pypKeyMetricsScreenshot1029.jpg
+总体：487q 全量已跑通，status=completed、run_valid=true；agent 487/487，judge_status 487/487，有效分数 486/487（item 486 缺 expected_action）。核心结果：exact 48.4%、core 66.9%、answer_quality 1.15/2；候选检索 recall 50.2%，但交付 recall 只有 25.5%。
+    突出问题
+    1. 检索“找得到但交不出来/选不准”是最大结构性问题
+    候选 precision 仅 12.7%；交付 media recall 25.5%（image 24.6%、video 33.9%）。R 层为首因 154/487（31.6%）；最大的 event_memory_qa（194 题）recall 仅 36.7%。
+    回答:候选 precision反应的是模型看到的所有候选里，有多少是这道题的 GT,这个数值是正常的.交付 media recall这个参数不是检索准确率,是模型在最终回答中确定要交付图片的准确率,实际上模型答对了问题也有可能不交付图片导致偏低,但是当前还是没有找到一个合适的交付图片的方法.R层失败现在是指至少有一个 GT 媒体没出现在检索候选里（不是“一个都没找到”),不过我也认为这个统计口径有些极端了。最后event_memory_qa（194 题）recall 原因和上述第二条一致.
+    2. 答案错误不能全归因检索
+    161 个 0 分中：R 首因 57、T 19、V 6，另有 79 个各层均 PASS 仍得 0 分。说明生成/判定本身也有明显问题；整体 0 分占 33.1%，exact 仅 48.4%。
+    3. 工具与流程可靠性不足
+    read_photo_text 成功率仅 66.1%，get_result_page 90.1%；T 层失败 92 题。16% 未在步数预算内完成，53 个 turn answered_with_gap，15 次 step_budget_exhausted。12 条 prompt injection 中 4 条未正确拒答（2 条直接回答、2 条无有效动作）。
+    回答:工具成功率不仅仅反映的是模型调用后的失败,还有可能是模型调用参数错误或者模型重复调用被拒绝(比如get_result_page模型可能来回翻第一和第二页,所以代码存在的机制会拒绝执行).当然这个问题可靠性不足的问题确实存在,这周的工作里增加了更多代码控制工具而不是全权交给模型的优化.
+    4. 记忆图谱没有净收益
+    图路由改善 34 题、恶化 53 题；event memory 图增益仅 +0.0007，single-evidence -0.0431，且 graph intent 全部是 general。候选集被改变了，但排序没有变好。 
+    5. 评测口径存在缺口
+    evidence judge 全部 not_applicable，evidence_valid_count=0，无法判断视觉事实是否有图片支持；task_decision 汇总值是陈旧的（真实 439/559=78.5%，summary 写成 82.8% 但只有 174 个有效样本）；最终评分来自 5 个 judge 模型，横评可比性受限。
+    6. 性能与上下文余量偏紧
+    p95 242s/题、最长 18.1min，agent 吞吐约 58 题/小时，整轮约 22.8h；上下文 p95 5.2k、max 6.7k，距每槽 8k 上限不远。
+    回答:是的,这是当前基线的一个巨大的问题,已经修正为16k.
+- 问题反馈
+    1. 从github拉取到个人mac mini电脑上复现的过程有点曲折，有些需要的文件没有相应文档写明获取方式，但是可以靠记录摸索出来
+    2. 流水线处理显示“344/344 资产完成”的时候，其实还有流水线的一些其他工作还在进行，344/344 只是资产导入/观测完成，不包含后面的事件总结、记忆图谱、家庭图谱、人物洞察。这些都在同一个长时间同步的 /pipeline/process 请求里继续跑，但显得端口看起来无响应，误以为程序卡死。
+8191具体是 Sentrix API 的 POST /api/v1/pipeline/process 一直不返回。
+8772（PhotoBench）本身是通的，只是它的进度只显示资产 344/344，所以看起来像卡住。
+    3. QA环节一开始不知道要多少token，把免费模型额度耗完了，然后才发现单次跑不完。后续尝试写了个分块式的QA，分成五块，但是有其中一块还是超出了云端限额
+[lcl]
+M4验证结果
+- benchmark 任务截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/lclTaskScreenshot1029.jpg
+- benchmark 关键指标截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/lclKeyMetricsScreenshot1029.jpg
+- 问题反馈
+总体：最新 LoRA Q4_K_M 的 487q 全量已跑通，status=completed、run_valid=true；Agent 执行记录 487/487、Judge 完成记录 487/487，有效评分 486/487。整轮耗时约 19 小时 10 分钟。
+核心结果：exact 45.1%、core 89.5%、answer_quality 1.346/2；候选检索 recall 54.1%，最终媒体交付 recall 18.9%；图片工具 R@5 83.24%。
 
-- 问题反馈[ysh]
+工具非成功主要来自无文字和预算拒绝，不能全归因服务不稳定
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/lclchart.png
+read_photo_text 的 119 次非成功中：
+- 60 次未检测到文字；
+- 39 次触发连续未成功保护；
+- 13 次照片取证额度耗尽；
+- 7 次工具预算耗尽。
+模型在没有文字或额度耗尽后，仍会尝试无效动作。
+Tool 层失败涉及 71 题；155 题最终为 answered_with_gap，9 题步数耗尽。按现有稳定性口径，仅 63.0% 被判定为步数内完成，但剩余 37% 也不全是步数耗尽。
+[xy]/[ly]/[zhx](尚未填入，下一次更新补录)
 M4验证结果
 - benchmark 任务截图
 
