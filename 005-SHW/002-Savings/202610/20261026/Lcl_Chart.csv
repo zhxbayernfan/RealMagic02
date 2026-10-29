@@ -1,0 +1,5 @@
+工具,成功率,主要问题
+search_memories,98.90%,重复检索、连续失败保护
+get_result_page,94.50%,翻页额度、重复调用限制
+inspect_photo,95.60%,取证额度，另有一次模型不可用
+read_photo_text,54.20%,无文字、重复调用及预算限制
