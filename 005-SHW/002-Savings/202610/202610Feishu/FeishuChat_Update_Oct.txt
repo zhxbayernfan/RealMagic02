@@ -486,4 +486,44 @@ Mac上我跑的我整理过的1000+QA版本，还在跑，估计得明天才能�
 华哥我跑成1k的了快跑完了[捂脸]
 [ysh]
 ok，尽量别拖到周五
+[聊天记录更新于2026-10-29 16:03]
+(网页dogfooding收集)
+[ysh]
+M4验证结果
+- benchmark 任务截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/yshTaskScreenshot1029.jpg
+- benchmark 关键指标截图
+/home/sscy/lingbot-map/000Notes/004SHW/04OrinTest/PicsOfFeishu/202610/yshKeyMetricsScreenshot1029.jpg
+- 问题反馈
+    - 耗时长达 16 小时+，其中流水线 6 小时+，QA 测评 10+小时
+    - 质量均分有所提高，达到 1.2分，分析是否有关联
+
+[ysh]
+M4验证结果
+- benchmark 任务截图
+
+- benchmark 关键指标截图
+
+- 问题反馈
+
+[ysh]
+M4验证结果
+- benchmark 任务截图
+
+- benchmark 关键指标截图
+
+- 问题反馈
+[ysh]
+M4验证结果
+- benchmark 任务截图
+
+- benchmark 关键指标截图
+
+- 问题反馈[ysh]
+M4验证结果
+- benchmark 任务截图
+
+- benchmark 关键指标截图
+
+- 问题反馈
 [聊天记录更新于]
